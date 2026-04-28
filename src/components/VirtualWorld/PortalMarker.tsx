@@ -19,7 +19,7 @@ export default function PortalMarker({
 }: PortalMarkerProps) {
   return (
     <div
-      className={`absolute transition-all group flex items-center justify-center z-50 ${styleClass || ''}`}
+      className={`absolute group flex items-center justify-center z-50 ${styleClass || ''}`}
       style={{
         left: `${(portal.sourceX / widthTiles) * 100}%`,
         top: `${(portal.sourceY / heightTiles) * 100}%`,
@@ -35,16 +35,16 @@ export default function PortalMarker({
         <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-md animate-pulse" />
       </div>
 
-      {/* HITBOX (Upright invisible button for easy clicking) */}
+      {/* CLICK HITBOX & LABEL (Carefully Centered) */}
       <button
         type="button"
         onClick={onClick}
-        className="absolute inset-x-[-10px] inset-y-[-40px] z-[60] billboard-rpg cursor-pointer bg-transparent border-none outline-none focus:outline-none"
-        title={label || portal.label}
+        className="absolute inset-0 z-[60] flex items-center justify-center cursor-pointer bg-transparent border-none outline-none focus:outline-none"
+        style={{ transform: 'rotateX(-37deg) rotateZ(45deg) translateY(-20px)' }} // Opposite of map rotation to stand up without displacement
       >
         {/* Floating Label */}
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none whitespace-nowrap">
-          <div className="bg-slate-900/90 border border-cyan-500/50 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 pointer-events-none whitespace-nowrap">
+          <div className="bg-slate-900/95 border border-cyan-500/50 px-3 py-1 rounded-full shadow-[0_0_20px_rgba(34,211,238,0.4)] backdrop-blur-md">
             <span className="text-[10px] font-black text-cyan-300 uppercase tracking-tighter">
               {label || portal.label || 'GATE'}
             </span>
@@ -52,8 +52,8 @@ export default function PortalMarker({
         </div>
 
         {/* Interact Key (Visible on hover) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          <div className="bg-white text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded shadow-xl animate-bounce">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <div className="bg-white text-slate-950 text-[9px] font-black px-2 py-0.5 rounded shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce">
             CLICK
           </div>
         </div>
