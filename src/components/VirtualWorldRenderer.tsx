@@ -6,6 +6,8 @@ import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
 import CollisionLayer from './VirtualWorld/CollisionLayer';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
+import InventoryPanel from './VirtualWorld/InventoryPanel';
+import StatsPanel from './VirtualWorld/StatsPanel';
 import { useVirtualWorld } from '../hooks/useVirtualWorld';
 
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
@@ -59,67 +61,101 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto">
-      {/* 상단 맵 정보 헤더 */}
-      <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-        <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
-        <div className="text-slate-300 text-sm font-semibold px-3 py-1 bg-slate-900 rounded-full border border-slate-600">
-          현재 접속: {avatars.length}명
-        </div>
-      </div>
-
-      {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
-      <MapLayer currentMap={currentMap}>
-        <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
+    <div className="w-full max-w-[1400px] mx-auto p-4 lg:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {portals.map(portal => (
-          <PortalMarker 
-            key={portal.id} 
-            portal={portal} 
-            widthTiles={widthTiles} 
-            heightTiles={heightTiles}
-            onClick={() => handlePortalClick(portal.sourcePortalKey)}
-          />
-        ))}
+        {/* Main Canvas Area */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          {/* 상단 맵 정보 헤더 */}
+          <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
+            <div className="flex flex-col">
+              <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
+              <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
+            </div>
+            <div className="text-slate-300 text-sm font-semibold px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
+              접속 중: {avatars.length}명
+            </div>
+          </div>
 
-        {npcs.map(npc => (
-          <NpcMarker 
-            key={npc.id} 
-            npc={npc} 
-            isSelected={selectedNpcCode === npc.npcCode}
-            onClick={() => handleNpcClick(npc.npcCode)}
-          />
-        ))}
+          {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
+          <div className="relative">
+            <MapLayer currentMap={currentMap}>
+              <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
+              
+              {portals.map(portal => (
+                <PortalMarker 
+                  key={portal.id} 
+                  portal={portal} 
+                  widthTiles={widthTiles} 
+                  heightTiles={heightTiles}
+                  onClick={() => handlePortalClick(portal.sourcePortalKey)}
+                />
+              ))}
 
-        <AvatarLayer 
-          avatars={avatars} 
-          selectedMemberNo={data.selectedMemberNo} 
-          widthTiles={widthTiles} 
-          heightTiles={heightTiles} 
-        />
-      </MapLayer>
+              {npcs.map(npc => (
+                <NpcMarker 
+                  key={npc.id} 
+                  npc={npc} 
+                  isSelected={selectedNpcCode === npc.npcCode}
+                  onClick={() => handleNpcClick(npc.npcCode)}
+                />
+              ))}
 
-      {/* 대화창 UI */}
-      {selectedNpc && (dialogue || selectedNpcCode) && (
-        <DialoguePanel 
-          npc={selectedNpc} 
-          dialogue={dialogue} 
-          onClose={() => {
-            setDialogue(null);
-            setSelectedNpcCode(null);
-          }} 
-        />
-      )}
+              <AvatarLayer 
+                avatars={avatars} 
+                selectedMemberNo={data.selectedMemberNo} 
+                widthTiles={widthTiles} 
+                heightTiles={heightTiles} 
+              />
+            </MapLayer>
 
-      {/* 방향키 조작부 */}
-      <div className="flex flex-col items-center gap-3 bg-slate-800/80 p-5 rounded-2xl border border-white/10 w-full max-w-sm">
-        <p className="text-xs text-cyan-200/70 font-semibold tracking-widest uppercase mb-1">Movement Controls</p>
-        <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('up')}>↑ (W)</button>
-        <div className="flex gap-3">
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('left')}>← (A)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('down')}>↓ (S)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('right')}>→ (D)</button>
+            {/* 대화창 UI */}
+            {selectedNpc && (dialogue || selectedNpcCode) && (
+              <DialoguePanel 
+                npc={selectedNpc} 
+                dialogue={dialogue} 
+                onClose={() => {
+                  setDialogue(null);
+                  setSelectedNpcCode(null);
+                }} 
+              />
+            )}
+          </div>
+
+          {/* 하단 조작부 및 정보 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-800/60 backdrop-blur-md p-6 rounded-3xl border border-white/5 shadow-lg">
+              <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-4 px-1">Navigation</h4>
+              <div className="flex flex-col items-center gap-3">
+                <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('up')}>↑</button>
+                <div className="flex gap-3">
+                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('left')}>←</button>
+                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('down')}>↓</button>
+                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('right')}>→</button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-slate-800/60 backdrop-blur-md p-6 rounded-3xl border border-white/5 shadow-lg flex flex-col justify-center">
+              <div className="text-center space-y-2">
+                <div className="text-3xl">🎮</div>
+                <h4 className="text-sm font-black text-white uppercase tracking-tight">Keyboard Enabled</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Use <span className="text-cyan-400 font-bold">W, A, S, D</span> or <span className="text-cyan-400 font-bold">Arrow Keys</span><br />
+                  to move around the world.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Sidebar Area */}
+        <div className="lg:col-span-4 flex flex-col gap-6 h-fit lg:sticky lg:top-8">
+          <StatsPanel data={data} />
+          <InventoryPanel data={data} />
+        </div>
+
       </div>
     </div>
   );
