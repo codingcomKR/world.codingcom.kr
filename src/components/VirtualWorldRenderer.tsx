@@ -179,11 +179,10 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
 
     const foundPath = findPath(
-      { x: Math.floor(myAvatar.positionX), y: Math.floor(myAvatar.positionY) },
-      { x: targetX, y: targetY },
-      collisionZones,
-      widthTiles,
-      heightTiles
+      Math.floor(myAvatar.positionX),
+      Math.floor(myAvatar.positionY),
+      targetX,
+      targetY
     );
 
     if (foundPath && foundPath.length > 0) {
