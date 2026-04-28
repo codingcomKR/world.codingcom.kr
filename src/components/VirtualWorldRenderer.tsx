@@ -86,8 +86,19 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   const handlePortalClick = async (portalKey: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const portal = portals.find(p => p.sourcePortalKey === portalKey);
-    if (!portal) return;
+    if (!portal || !myAvatar) return;
 
+    // 1. Pathfind to portal source first
+    const path = findPath(myAvatar.positionX, myAvatar.positionY, portal.sourceX, portal.sourceY);
+    
+    if (path) {
+      for (const step of path) {
+        moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
+        await new Promise(r => setTimeout(r, 120));
+      }
+    }
+
+    // 2. After reaching source, transition to target
     await moveAvatar(
       'down',
       portal.targetX,
@@ -99,32 +110,17 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
   const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
 
-  const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!myAvatar || dialogue) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const targetX = Math.floor((x / rect.width) * widthTiles);
-    const targetY = Math.floor((y / rect.height) * heightTiles);
-
-    // BFS Pathfinding
+  const findPath = (startX: number, startY: number, targetX: number, targetY: number) => {
     const queue: { x: number, y: number, path: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] }[] = [
-      { x: myAvatar.positionX, y: myAvatar.positionY, path: [] }
+      { x: startX, y: startY, path: [] }
     ];
     const visited = new Set<string>();
-    visited.add(`${myAvatar.positionX},${myAvatar.positionY}`);
-
-    let foundPath: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] | null = null;
+    visited.add(`${startX},${startY}`);
 
     while (queue.length > 0) {
       const { x, y, path } = queue.shift()!;
 
-      if (x === targetX && y === targetY) {
-        foundPath = path;
-        break;
-      }
+      if (x === targetX && y === targetY) return path;
 
       const neighbors = [
         { x: x, y: y - 1, dir: 'up' as const },
@@ -145,14 +141,27 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           queue.push({ x: next.x, y: next.y, path: [...path, next] });
         }
       }
-      if (queue.length > 1000) break; // Safety limit
+      if (queue.length > 1000) break;
     }
+    return null;
+  };
+
+  const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!myAvatar || dialogue) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const targetX = Math.floor((x / rect.width) * widthTiles);
+    const targetY = Math.floor((y / rect.height) * heightTiles);
+
+    const foundPath = findPath(myAvatar.positionX, myAvatar.positionY, targetX, targetY);
 
     if (foundPath) {
       for (const step of foundPath) {
-        // Fire and forget the move command to avoid network delay between steps
         moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
-        await new Promise(r => setTimeout(r, 120)); // Brisk walking speed
+        await new Promise(r => setTimeout(r, 120));
       }
     }
   };
