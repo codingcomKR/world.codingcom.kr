@@ -78,33 +78,37 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       case 'right': nextX++; break;
     }
 
-    // Optimistic update with proper immutability
-    setData(prev => {
-      if (!prev) return prev;
-      const isMyAvatar = (a: any) => a.memberNo === memberNo;
-      const updatedAvatars = prev.roomView.avatars.map(avatar => 
-        isMyAvatar(avatar) 
-          ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
-          : avatar
-      );
+    // Only perform optimistic update if we are moving within the SAME map
+    const isMapTransition = data && mapCode !== data.roomView.mapCode;
 
-      // Safely update memberView only if avatar exists
-      const updatedMemberView = prev.memberView.avatar ? {
-        ...prev.memberView,
-        avatar: {
-          ...prev.memberView.avatar,
-          positionX: nextX,
-          positionY: nextY,
-          facingDirection: direction
-        }
-      } : prev.memberView;
+    if (!isMapTransition) {
+      setData(prev => {
+        if (!prev) return prev;
+        const isMyAvatar = (a: any) => a.memberNo === memberNo;
+        const updatedAvatars = prev.roomView.avatars.map(avatar => 
+          isMyAvatar(avatar) 
+            ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
+            : avatar
+        );
 
-      return {
-        ...prev,
-        memberView: updatedMemberView,
-        roomView: { ...prev.roomView, avatars: updatedAvatars }
-      } as VirtualCampusAdminSnapshot;
-    });
+        // Safely update memberView only if avatar exists
+        const updatedMemberView = prev.memberView.avatar ? {
+          ...prev.memberView,
+          avatar: {
+            ...prev.memberView.avatar,
+            positionX: nextX,
+            positionY: nextY,
+            facingDirection: direction
+          }
+        } : prev.memberView;
+
+        return {
+          ...prev,
+          memberView: updatedMemberView,
+          roomView: { ...prev.roomView, avatars: updatedAvatars }
+        } as VirtualCampusAdminSnapshot;
+      });
+    }
 
     const result = await performAction({
       action: 'move_avatar',
