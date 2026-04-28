@@ -116,6 +116,9 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
 
     if (result.ok && result.dialogue) {
       setDialogue(result.dialogue);
+    } else if (result.ok && !result.dialogue) {
+      setError('이 NPC는 현재 할 말이 없는 것 같습니다.');
+      setDialogue(null);
     }
     
     return result;
