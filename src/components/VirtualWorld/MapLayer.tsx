@@ -11,89 +11,74 @@ interface MapLayerProps {
 export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles } = currentMap;
   
-  const tileSize = 80;
-  // Make the visual map MUCH larger than the playable area to act as the "Infinite Floor"
-  const visualPadding = 20; 
-  const visualWidth = (widthTiles + visualPadding * 2) * tileSize;
-  const visualHeight = (heightTiles + visualPadding * 2) * tileSize;
+  // Standard 2:1 Isometric Tile dimensions (128x64)
+  const TILE_WIDTH = 128;
+  const TILE_HEIGHT = 64;
+  const HALF_WIDTH = TILE_WIDTH / 2;
+  const HALF_HEIGHT = TILE_HEIGHT / 2;
 
-  // 1. Calculate player's position relative to the visual center
-  const px = (playerX + visualPadding + 0.5) * tileSize;
-  const py = (playerY + visualPadding + 0.5) * tileSize;
-  
-  // 2. Camera Translation (Centered on player but CLAMPED)
-  // We want to keep the player centered, but we MUST NOT show the edges of the visualWidth/Height.
-  // Conservative clamping: allow only moving within the center area.
-  const idealCX = (visualWidth / 2) - px;
-  const idealCY = (visualHeight / 2) - py;
-  
-  // Hard clamp: ensures that even with rotation/scale, we stay within the visual map.
-  const clampLimit = visualWidth * 0.25; 
-  const cx = Math.max(-clampLimit, Math.min(clampLimit, idealCX));
-  const cy = Math.max(-clampLimit, Math.min(clampLimit, idealCY));
+  // 1. Calculate Player Screen Position (Isometric)
+  const playerScreenX = (playerX - playerY) * HALF_WIDTH;
+  const playerScreenY = (playerX + playerY) * HALF_HEIGHT;
 
-  const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
+  // 2. Camera Centering
+  const cx = -playerScreenX;
+  const cy = -playerScreenY;
 
   return (
-    <div className="view-3d-container relative flex items-center justify-center bg-[#0f172a] overflow-hidden">
-      {/* RPG Camera Rig */}
+    <div className="view-3d-container relative flex items-center justify-center bg-[#020617] overflow-hidden">
+      {/* Dark background layer */}
+      <div className="absolute inset-0 bg-[#0f172a]" />
+
+      {/* Isometric Camera Rig (2D Only) */}
       <div
-        className={`relative ${mapClass} transition-transform duration-700 ease-out`}
+        className="relative transition-transform duration-700 ease-out"
         id="rpg-camera-plane"
         data-cx={cx}
         data-cy={cy}
         style={{
-          width: `${visualWidth}px`,
-          height: `${visualHeight}px`,
-          transformStyle: 'preserve-3d',
-          // Zoomed scale to ensure full coverage
-          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3.5)' : 'rotateX(37deg) rotateZ(-45deg) scale(1.6)'} translate(${cx}px, ${cy}px)`
+          transform: `translate(${cx}px, ${cy}px)`,
         }}
       >
-        {/* The Playable Zone (The Room) */}
+        {/* Playable Floor (The Diamond) */}
         <div 
-          className="absolute shadow-[0_0_150px_rgba(0,0,0,1)]"
+          className="absolute"
           style={{
-            left: `${visualPadding * tileSize}px`,
-            top: `${visualPadding * tileSize}px`,
-            width: `${widthTiles * tileSize}px`,
-            height: `${heightTiles * tileSize}px`,
-            backgroundColor: '#0f172a',
-            backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 20px, #1e293b 20px, #1e293b 21px)',
-            transformStyle: 'preserve-3d'
+            width: `${(widthTiles + heightTiles) * HALF_WIDTH}px`,
+            height: `${(widthTiles + heightTiles) * HALF_HEIGHT}px`,
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
           }}
         >
-          {/* Subtle Grid */}
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          <div 
+            className="absolute inset-0 shadow-[0_0_150px_rgba(0,0,0,0.8)]"
+            style={{
+              backgroundColor: '#1e293b',
+              backgroundImage: `repeating-linear-gradient(45deg, #0f172a 0, #0f172a 2px, transparent 2px, transparent 20px)`,
+              clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+            }}
+          />
+          
+          {/* Tile Grid (Visual Only) */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none"
                style={{
-                 backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
-                 backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
+                 backgroundImage: `
+                   linear-gradient(116.5deg, transparent 49%, #64748b 50%, transparent 51%),
+                   linear-gradient(63.5deg, transparent 49%, #64748b 50%, transparent 51%)
+                 `,
+                 backgroundSize: `${TILE_WIDTH}px ${TILE_HEIGHT}px`
                }} />
-
-          {/* Markers/Avatars */}
-          <div className="absolute inset-0">
-            {children}
-          </div>
-
-          {/* Structural Walls */}
-          <div className="absolute top-0 left-0 right-0 h-96 bg-slate-800 border-b-8 border-cyan-500/20" 
-               style={{ transform: 'rotateX(-90deg)', transformOrigin: 'top' }} />
-          <div className="absolute top-0 right-0 bottom-0 w-96 bg-slate-850 border-l-8 border-cyan-500/20" 
-               style={{ transform: 'rotateY(-90deg)', transformOrigin: 'right' }} />
         </div>
 
-        {/* Extended Floor (The Outside Area) */}
-        <div className="absolute inset-0 pointer-events-none" 
-             style={{ 
-               backgroundColor: '#0f172a',
-               backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 40px, #131c31 40px, #131c31 41px)',
-               transform: 'translateZ(-10px)',
-               opacity: 0.4
-             }} />
+        {/* Content Layer (Avatars, NPCs, etc) */}
+        <div className="relative">
+          {children}
+        </div>
       </div>
 
-      {/* Atmospheric Fog Overlay */}
-      <div className="absolute inset-0 map-overlay-shadow pointer-events-none" />
+      {/* High-end Vignette Overlay */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(2,6,23,0.7)_100%)]" />
     </div>
   );
 }

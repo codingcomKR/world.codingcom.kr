@@ -2,45 +2,43 @@ import type { VirtualCampusPortalSummary } from '../../types/virtual-campus';
 
 interface PortalMarkerProps {
   portal: VirtualCampusPortalSummary;
-  label?: string;
-  styleClass?: string;
   onClick: (e: React.MouseEvent) => void;
   widthTiles: number;
   heightTiles: number;
+  label?: string;
+  styleClass?: string;
 }
 
 export default function PortalMarker({
   portal,
-  label,
-  styleClass,
   onClick,
-  widthTiles,
-  heightTiles
+  label,
+  styleClass
 }: PortalMarkerProps) {
   return (
     <div
-      className={`absolute group flex items-center justify-center z-50 ${styleClass || ''}`}
+      className={`absolute group flex items-center justify-center z-10 ${styleClass || ''}`}
       style={{
-        left: `${(portal.sourceX / widthTiles) * 100}%`,
-        top: `${(portal.sourceY / heightTiles) * 100}%`,
-        width: `${(portal.sourceWidthTiles / widthTiles) * 100}%`,
-        height: `${(portal.sourceHeightTiles / heightTiles) * 100}%`,
-        transformStyle: 'preserve-3d',
+        // 2:1 Isometric Projection
+        left: `${(portal.sourceX - portal.sourceY) * 64}px`,
+        top: `${(portal.sourceX + portal.sourceY) * 32}px`,
+        width: '128px',
+        height: '64px',
+        transform: 'translate(-50%, -50%)', // Center on tile
       }}
     >
-      {/* VISUALS (Flat on the floor) */}
-      <div className="absolute inset-0 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
-        <div className="absolute inset-0 rounded-full border-4 border-cyan-500/40 animate-[spin_10s_linear_infinite]" />
-        <div className="absolute inset-2 rounded-full border-2 border-dashed border-cyan-400/30 animate-[spin_6s_linear_infinite_reverse]" />
-        <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-md animate-pulse" />
+      {/* VISUALS (Isometric Diamond Shape) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 rounded-full border-4 border-cyan-500/40 animate-[spin_10s_linear_infinite] scale-y-[0.5]" />
+        <div className="absolute inset-2 rounded-full border-2 border-dashed border-cyan-400/30 animate-[spin_6s_linear_infinite_reverse] scale-y-[0.5]" />
+        <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-md animate-pulse scale-y-[0.5]" />
       </div>
 
-      {/* CLICK HITBOX & LABEL (Carefully Centered) */}
+      {/* HITBOX */}
       <button
         type="button"
         onClick={onClick}
-        className="absolute inset-0 z-[60] flex items-center justify-center cursor-pointer bg-transparent border-none outline-none focus:outline-none"
-        style={{ transform: 'rotateX(-37deg) rotateZ(45deg) translateY(-20px)' }} // Opposite of map rotation to stand up without displacement
+        className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-transparent border-none outline-none focus:outline-none"
       >
         {/* Floating Label */}
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 pointer-events-none whitespace-nowrap">
@@ -51,7 +49,7 @@ export default function PortalMarker({
           </div>
         </div>
 
-        {/* Interact Key (Visible on hover) */}
+        {/* CLICK Indicator */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <div className="bg-white text-slate-950 text-[9px] font-black px-2 py-0.5 rounded shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce">
             CLICK

@@ -15,9 +15,7 @@ export default function NpcMarker({
   isSelected,
   canTalk,
   previewText,
-  onClick,
-  widthTiles,
-  heightTiles
+  onClick
 }: NpcMarkerProps) {
   const showSpeechBubble = isSelected || canTalk;
 
@@ -25,10 +23,12 @@ export default function NpcMarker({
     <button
       type="button"
       onClick={onClick}
-      className="absolute -translate-x-1/2 -translate-y-1/2 text-left group z-50 billboard-rpg"
+      className="absolute z-20 group billboard-rpg transition-all duration-300"
       style={{
-        left: `${((npc.positionX + 0.5) / widthTiles) * 100}%`,
-        top: `${((npc.positionY + 0.5) / heightTiles) * 100}%`,
+        // 2:1 Isometric Projection
+        left: `${(npc.positionX - npc.positionY) * 64}px`,
+        top: `${(npc.positionX + npc.positionY) * 32}px`,
+        transform: 'translate(-50%, -100%)', // Anchor to feet
       }}
     >
       {showSpeechBubble && (
@@ -56,7 +56,6 @@ export default function NpcMarker({
         }`}
         style={{ backgroundColor: npc.paletteColor }}
       >
-        {/* Interior Detail for Character feel */}
         <div 
           className="absolute inset-0 opacity-40"
           style={{ background: `radial-gradient(circle at top, ${npc.accentColor}, transparent)` }}
