@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import VirtualWorldRenderer from './VirtualWorldRenderer';
 
 export default function App() {
   const [data, setData] = useState<any>(null);
@@ -25,26 +26,30 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-900 text-white">
-        <h1 className="text-2xl font-bold animate-pulse">데이터 불러오는 중... 🚀</h1>
+      <div className="flex h-screen w-screen items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+          <h1 className="text-xl font-bold tracking-widest text-cyan-400 animate-pulse uppercase">Initialising System... 🚀</h1>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-red-900 text-white">
-        <h1 className="text-2xl font-bold">에러 발생: {error}</h1>
+      <div className="flex h-screen w-screen items-center justify-center bg-red-950 text-white">
+        <div className="p-8 border-2 border-red-500 rounded-2xl bg-black/50 backdrop-blur-xl text-center">
+          <h1 className="text-2xl font-black text-red-500 uppercase mb-4 tracking-tighter">System Error Detected</h1>
+          <p className="text-red-200/60 font-mono text-sm">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold text-white mb-6">Virtual Campus API 연동 성공! 🎉</h1>
-      <pre className="bg-gray-800 text-green-400 p-6 rounded-lg shadow-xl overflow-auto max-w-4xl w-full font-mono text-sm">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    </div>
+    <VirtualWorldRenderer 
+      memberView={data.memberView} 
+      roomView={data.roomView} 
+    />
   );
 }
