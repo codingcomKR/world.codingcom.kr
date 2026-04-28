@@ -1,4 +1,5 @@
 import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
+import { MAP_ACCENT } from '../../constants/virtual-campus';
 
 interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
@@ -6,7 +7,8 @@ interface MapLayerProps {
 }
 
 export default function MapLayer({ currentMap, children }: MapLayerProps) {
-  const { widthTiles, heightTiles } = currentMap;
+  const { widthTiles, heightTiles, mapKind } = currentMap;
+  const accentColor = MAP_ACCENT[mapKind] || 'border-cyan-700/50';
 
   return (
     <div
