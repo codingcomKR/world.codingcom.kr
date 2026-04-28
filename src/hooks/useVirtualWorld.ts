@@ -109,7 +109,7 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
     const result = await performAction({
       action: 'move_avatar',
       memberNo,
-      mapCode: targetMapCode,
+      mapCode: mapCode,
       positionX: nextX,
       positionY: nextY,
       facingDirection: direction,
@@ -117,7 +117,7 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
     });
 
     // If map changed, we MUST refresh the full state
-    if (result.ok && targetMapCode !== mapCode) {
+    if (result.ok && data && mapCode !== data.roomView.mapCode) {
       setData(result);
     }
 
