@@ -12,49 +12,50 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
   const { widthTiles, heightTiles } = currentMap;
   
   const tileSize = 80;
-  const paddingTiles = 10; // Extra buffer
-  const mapWidth = (widthTiles + paddingTiles * 2) * tileSize;
-  const mapHeight = (heightTiles + paddingTiles * 2) * tileSize;
+  // Make the visual map MUCH larger than the playable area to act as the "Infinite Floor"
+  const visualPadding = 20; 
+  const visualWidth = (widthTiles + visualPadding * 2) * tileSize;
+  const visualHeight = (heightTiles + visualPadding * 2) * tileSize;
 
-  // 1. Ideal center position
-  const px = (playerX + paddingTiles + 0.5) * tileSize;
-  const py = (playerY + paddingTiles + 0.5) * tileSize;
+  // 1. Calculate player's position relative to the visual center
+  const px = (playerX + visualPadding + 0.5) * tileSize;
+  const py = (playerY + visualPadding + 0.5) * tileSize;
   
-  const idealX = (mapWidth / 2) - px;
-  const idealY = (mapHeight / 2) - py;
-
-  // 2. Strict Clamping to hide void
-  // We allow the map to shift only within a safe margin of its total size
-  const limitX = mapWidth * 0.2; 
-  const limitY = mapHeight * 0.2;
+  // 2. Camera Translation (Centered on player but CLAMPED)
+  // We want to keep the player centered, but we MUST NOT show the edges of the visualWidth/Height.
+  // Conservative clamping: allow only moving within the center area.
+  const idealCX = (visualWidth / 2) - px;
+  const idealCY = (visualHeight / 2) - py;
   
-  const cx = Math.max(-limitX, Math.min(limitX, idealX));
-  const cy = Math.max(-limitY, Math.min(limitY, idealY));
+  // Hard clamp: ensures that even with rotation/scale, we stay within the visual map.
+  const clampLimit = visualWidth * 0.25; 
+  const cx = Math.max(-clampLimit, Math.min(clampLimit, idealCX));
+  const cy = Math.max(-clampLimit, Math.min(clampLimit, idealCY));
 
   const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
 
   return (
-    <div className="view-3d-container relative flex items-center justify-center bg-[#020617] overflow-hidden">
-      {/* RPG World Container */}
+    <div className="view-3d-container relative flex items-center justify-center bg-[#0f172a] overflow-hidden">
+      {/* RPG Camera Rig */}
       <div
         className={`relative ${mapClass} transition-transform duration-700 ease-out`}
         id="rpg-camera-plane"
         data-cx={cx}
         data-cy={cy}
         style={{
-          width: `${mapWidth}px`,
-          height: `${mapHeight}px`,
+          width: `${visualWidth}px`,
+          height: `${visualHeight}px`,
           transformStyle: 'preserve-3d',
-          // Scale 1.5 to ensure coverage
-          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3)' : 'rotateX(37deg) rotateZ(-45deg) scale(1.5)'} translate(${cx}px, ${cy}px)`
+          // Zoomed scale to ensure full coverage
+          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3.5)' : 'rotateX(37deg) rotateZ(-45deg) scale(1.6)'} translate(${cx}px, ${cy}px)`
         }}
       >
-        {/* Playable Grid */}
+        {/* The Playable Zone (The Room) */}
         <div 
-          className="absolute shadow-[0_0_200px_rgba(0,0,0,1)]"
+          className="absolute shadow-[0_0_150px_rgba(0,0,0,1)]"
           style={{
-            left: `${paddingTiles * tileSize}px`,
-            top: `${paddingTiles * tileSize}px`,
+            left: `${visualPadding * tileSize}px`,
+            top: `${visualPadding * tileSize}px`,
             width: `${widthTiles * tileSize}px`,
             height: `${heightTiles * tileSize}px`,
             backgroundColor: '#0f172a',
@@ -62,31 +63,36 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
             transformStyle: 'preserve-3d'
           }}
         >
+          {/* Subtle Grid */}
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
                style={{
                  backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
                  backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
                }} />
 
-          {children}
+          {/* Markers/Avatars */}
+          <div className="absolute inset-0">
+            {children}
+          </div>
 
-          {/* 3D Boundaries */}
+          {/* Structural Walls */}
           <div className="absolute top-0 left-0 right-0 h-96 bg-slate-800 border-b-8 border-cyan-500/20" 
                style={{ transform: 'rotateX(-90deg)', transformOrigin: 'top' }} />
           <div className="absolute top-0 right-0 bottom-0 w-96 bg-slate-850 border-l-8 border-cyan-500/20" 
                style={{ transform: 'rotateY(-90deg)', transformOrigin: 'right' }} />
         </div>
 
-        {/* Outer Floor (Padding) */}
+        {/* Extended Floor (The Outside Area) */}
         <div className="absolute inset-0 pointer-events-none" 
              style={{ 
                backgroundColor: '#0f172a',
-               backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 40px, #020617 40px, #020617 41px)',
+               backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 40px, #131c31 40px, #131c31 41px)',
                transform: 'translateZ(-10px)',
-               opacity: 0.5
+               opacity: 0.4
              }} />
       </div>
 
+      {/* Atmospheric Fog Overlay */}
       <div className="absolute inset-0 map-overlay-shadow pointer-events-none" />
     </div>
   );

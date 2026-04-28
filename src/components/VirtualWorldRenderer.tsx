@@ -156,7 +156,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const sy = e.clientY - (rect.top + rect.height / 2);
 
     // 1. Compensate for Tilt & Scale
-    const scale = 1.5;
+    const scale = 1.6;
     const tiltScale = Math.cos(37 * Math.PI / 180);
     
     // Get current camera translation from the DOM (synced with MapLayer)
@@ -164,7 +164,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const cx = Number(cameraPlane?.getAttribute('data-cx') || 0);
     const cy = Number(cameraPlane?.getAttribute('data-cy') || 0);
 
-    // 2. Reverse Projection
+    // 2. Reverse Projection (Subtract camera offset first)
     const projectedX = (sx / scale) - cx;
     const projectedY = (sy / (tiltScale * scale)) - cy;
 
@@ -176,14 +176,14 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const rx = projectedX * cosR - projectedY * sinR;
     const ry = projectedX * sinR + projectedY * cosR;
 
-    // 4. Convert to Tile Coordinates (Adjust for Padding)
+    // 4. Convert to Tile Coordinates (Adjust for large Padding)
     const tileSize = 80;
-    const paddingTiles = 10;
-    const mapWidth = (widthTiles + paddingTiles * 2) * tileSize;
-    const mapHeight = (heightTiles + paddingTiles * 2) * tileSize;
+    const visualPadding = 20;
+    const visualWidth = (widthTiles + visualPadding * 2) * tileSize;
+    const visualHeight = (heightTiles + visualPadding * 2) * tileSize;
 
-    const targetX = Math.floor((rx + mapWidth / 2) / tileSize) - paddingTiles;
-    const targetY = Math.floor((ry + mapHeight / 2) / tileSize) - paddingTiles;
+    const targetX = Math.floor((rx + visualWidth / 2) / tileSize) - visualPadding;
+    const targetY = Math.floor((ry + visualHeight / 2) / tileSize) - visualPadding;
 
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
 
