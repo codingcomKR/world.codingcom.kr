@@ -9,7 +9,7 @@ interface MapLayerProps {
 }
 
 export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
-  const { widthTiles, heightTiles, mapKind } = currentMap;
+  const { widthTiles, heightTiles } = currentMap;
   
   // Calculate offset to keep player centered without nauseating shifts
   const centerX = ((playerX + 0.5) / widthTiles) * 100;
