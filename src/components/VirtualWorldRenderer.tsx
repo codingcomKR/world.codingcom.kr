@@ -149,14 +149,14 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     if (foundPath) {
       for (const step of foundPath) {
         await moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
-        await new Promise(r => setTimeout(r, 100)); // Small delay for visual smoothness
+        await new Promise(r => setTimeout(r, 20)); // Faster movement
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 lg:p-8 font-sans selection:bg-cyan-500/30">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 lg:p-6 font-sans selection:bg-cyan-500/30">
+      <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Map Area */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Map Information Header */}
