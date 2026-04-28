@@ -25,18 +25,21 @@ interface MapInfo {
 }
 
 interface VirtualWorldRendererProps {
-  memberView: {
-    selectedMemberNo: string;
-  };
-  roomView: {
-    currentMap: MapInfo;
-    collisionZones: CollisionZone[];
-    portals: Portal[];
-    avatars: Avatar[];
+  data: {
+    memberView: {
+      selectedMemberNo: string;
+    };
+    roomView: {
+      currentMap: MapInfo;
+      collisionZones: CollisionZone[];
+      portals: Portal[];
+      avatars: Avatar[];
+    };
   };
 }
 
-const VirtualWorldRenderer: React.FC<VirtualWorldRendererProps> = ({ memberView, roomView }) => {
+const VirtualWorldRenderer: React.FC<VirtualWorldRendererProps> = ({ data }) => {
+  const { memberView, roomView } = data;
   const { currentMap, collisionZones, portals, avatars } = roomView;
   const { selectedMemberNo } = memberView;
 

@@ -47,9 +47,6 @@ export default function App() {
   }
 
   return (
-    <VirtualWorldRenderer 
-      memberView={data.memberView} 
-      roomView={data.roomView} 
-    />
+    <VirtualWorldRenderer data={data} />
   );
 }
