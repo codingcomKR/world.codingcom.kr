@@ -140,10 +140,17 @@ export interface VirtualCampusAdminSnapshot {
     rewardMode: 'sandbox' | 'live';
     defaultSpawnMapCode: string;
   };
+  selectedMemberNo?: string;
+  roomView: {
+    currentMap: VirtualCampusMapSummary;
+    avatars: VirtualCampusAvatarSummary[];
+    portals: VirtualCampusPortalSummary[];
+    collisionZones: VirtualCampusCollisionZoneSummary[];
+    npcs: VirtualCampusNpcSummary[];
+  };
   maps: VirtualCampusMapSummary[];
   portals: VirtualCampusPortalSummary[];
   collisionZones: VirtualCampusCollisionZoneSummary[];
   npcs: VirtualCampusNpcSummary[];
   avatars: VirtualCampusAvatarSummary[];
-  // ... (필요에 따라 더 추가 가능)
 }

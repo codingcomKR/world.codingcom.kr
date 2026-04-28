@@ -1,4 +1,4 @@
-import { VirtualCampusAdminSnapshot } from '../types/virtual-campus';
+import type { VirtualCampusAdminSnapshot } from '../types/virtual-campus';
 import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 
@@ -24,11 +24,11 @@ export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdmi
 
       {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
       <MapLayer currentMap={currentMap}>
-        <AvatarLayer 
-          avatars={avatars} 
-          selectedMemberNo={data.world.worldCode /* 예시: 데이터 구조에 맞게 조정 */} 
-          widthTiles={widthTiles} 
-          heightTiles={heightTiles} 
+        <AvatarLayer
+          avatars={avatars}
+          selectedMemberNo={data.selectedMemberNo || ''}
+          widthTiles={widthTiles}
+          heightTiles={heightTiles}
         />
       </MapLayer>
 

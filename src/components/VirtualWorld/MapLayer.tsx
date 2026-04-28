@@ -1,4 +1,4 @@
-import { VirtualCampusMapSummary } from '../../types/virtual-campus';
+import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
 
 interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
@@ -9,7 +9,7 @@ export default function MapLayer({ currentMap, children }: MapLayerProps) {
   const { widthTiles, heightTiles } = currentMap;
 
   return (
-    <div 
+    <div
       className="relative bg-slate-900 border-2 border-cyan-700/50 rounded-xl overflow-hidden shadow-[0_0_30px_rgba(15,23,42,0.8)]"
       style={{
         width: '100%',

@@ -1,8 +1,8 @@
-import { 
-  VirtualCampusMapKind, 
-  VirtualCampusPhaseStatus, 
-  VirtualCampusItemSlotKey, 
-  VirtualCampusItemRarity 
+import type {
+  VirtualCampusMapKind,
+  VirtualCampusPhaseStatus,
+  VirtualCampusItemSlotKey,
+  VirtualCampusItemRarity
 } from '../types/virtual-campus';
 
 export const MAP_ACCENT: Record<VirtualCampusMapKind, string> = {
