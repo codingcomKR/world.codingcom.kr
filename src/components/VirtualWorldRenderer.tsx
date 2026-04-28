@@ -152,7 +152,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
       for (const step of foundPath) {
         // Fire and forget the move command to avoid network delay between steps
         moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
-        await new Promise(r => setTimeout(r, 10)); // Tiny visual gap
+        await new Promise(r => setTimeout(r, 60)); // Balanced running speed
       }
     }
   };
