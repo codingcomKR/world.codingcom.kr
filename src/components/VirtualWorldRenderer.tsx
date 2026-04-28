@@ -155,28 +155,35 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const sx = e.clientX - (rect.left + rect.width / 2);
     const sy = e.clientY - (rect.top + rect.height / 2);
 
-    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation, 1.4x scale)
-    const scale = 1.4;
+    // 1. Compensate for Tilt & Scale
+    const scale = 1.5;
     const tiltScale = Math.cos(37 * Math.PI / 180);
-    const projectedY = sy / (tiltScale * scale);
-    const projectedX = sx / scale;
+    
+    // Get current camera translation from the DOM (synced with MapLayer)
+    const cameraPlane = document.getElementById('rpg-camera-plane');
+    const cx = Number(cameraPlane?.getAttribute('data-cx') || 0);
+    const cy = Number(cameraPlane?.getAttribute('data-cy') || 0);
 
-    // 2. Compensate for Rotation (Z-axis -45deg)
+    // 2. Reverse Projection
+    const projectedX = (sx / scale) - cx;
+    const projectedY = (sy / (tiltScale * scale)) - cy;
+
+    // 3. Compensate for Rotation (Z-axis -45deg)
     const rotRad = -45 * Math.PI / 180;
     const cosR = Math.cos(-rotRad);
     const sinR = Math.sin(-rotRad);
     
-    const worldX = projectedX * cosR - projectedY * sinR;
-    const worldY = projectedX * sinR + projectedY * cosR;
+    const rx = projectedX * cosR - projectedY * sinR;
+    const ry = projectedX * sinR + projectedY * cosR;
 
-    // 3. Convert to Tile Coordinates (Adjust for Padding)
+    // 4. Convert to Tile Coordinates (Adjust for Padding)
     const tileSize = 80;
-    const paddingTiles = 8;
-    const playerX_px = (myAvatar.positionX + paddingTiles + 0.5) * tileSize;
-    const playerY_px = (myAvatar.positionY + paddingTiles + 0.5) * tileSize;
+    const paddingTiles = 10;
+    const mapWidth = (widthTiles + paddingTiles * 2) * tileSize;
+    const mapHeight = (heightTiles + paddingTiles * 2) * tileSize;
 
-    const targetX = Math.floor((worldX + playerX_px) / tileSize) - paddingTiles;
-    const targetY = Math.floor((worldY + playerY_px) / tileSize) - paddingTiles;
+    const targetX = Math.floor((rx + mapWidth / 2) / tileSize) - paddingTiles;
+    const targetY = Math.floor((ry + mapHeight / 2) / tileSize) - paddingTiles;
 
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
 

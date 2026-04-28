@@ -12,39 +12,44 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
   const { widthTiles, heightTiles } = currentMap;
   
   const tileSize = 80;
-  const paddingTiles = 8; // Extra floor space around the map
-  const totalWidth = (widthTiles + paddingTiles * 2) * tileSize;
-  const totalHeight = (heightTiles + paddingTiles * 2) * tileSize;
+  const paddingTiles = 10; // Extra buffer
+  const mapWidth = (widthTiles + paddingTiles * 2) * tileSize;
+  const mapHeight = (heightTiles + paddingTiles * 2) * tileSize;
 
-  // 1. Calculate ideal camera position (centered on player)
-  // We offset player position by paddingTiles
-  const playerX_px = (playerX + paddingTiles + 0.5) * tileSize;
-  const playerY_px = (playerY + paddingTiles + 0.5) * tileSize;
+  // 1. Ideal center position
+  const px = (playerX + paddingTiles + 0.5) * tileSize;
+  const py = (playerY + paddingTiles + 0.5) * tileSize;
   
-  const idealX = (totalWidth / 2) - playerX_px;
-  const idealY = (totalHeight / 2) - playerY_px;
+  const idealX = (mapWidth / 2) - px;
+  const idealY = (mapHeight / 2) - py;
 
-  // 2. Camera Clamping (Ensure edges never show)
-  const maxShiftX = totalWidth * 0.15;
-  const maxShiftY = totalHeight * 0.15;
-  const clampedX = Math.max(-maxShiftX, Math.min(maxShiftX, idealX));
-  const clampedY = Math.max(-maxShiftY, Math.min(maxShiftY, idealY));
+  // 2. Strict Clamping to hide void
+  // We allow the map to shift only within a safe margin of its total size
+  const limitX = mapWidth * 0.2; 
+  const limitY = mapHeight * 0.2;
+  
+  const cx = Math.max(-limitX, Math.min(limitX, idealX));
+  const cy = Math.max(-limitY, Math.min(limitY, idealY));
 
   const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
 
   return (
     <div className="view-3d-container relative flex items-center justify-center bg-[#020617] overflow-hidden">
-      {/* The RPG Camera Plane */}
+      {/* RPG World Container */}
       <div
         className={`relative ${mapClass} transition-transform duration-700 ease-out`}
+        id="rpg-camera-plane"
+        data-cx={cx}
+        data-cy={cy}
         style={{
-          width: `${totalWidth}px`,
-          height: `${totalHeight}px`,
+          width: `${mapWidth}px`,
+          height: `${mapHeight}px`,
           transformStyle: 'preserve-3d',
-          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3)' : 'rotateX(37deg) rotateZ(-45deg) scale(1.4)'} translate(${clampedX}px, ${clampedY}px)`
+          // Scale 1.5 to ensure coverage
+          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3)' : 'rotateX(37deg) rotateZ(-45deg) scale(1.5)'} translate(${cx}px, ${cy}px)`
         }}
       >
-        {/* Playable Area Content (Centered within padding) */}
+        {/* Playable Grid */}
         <div 
           className="absolute shadow-[0_0_200px_rgba(0,0,0,1)]"
           style={{
@@ -57,40 +62,31 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
             transformStyle: 'preserve-3d'
           }}
         >
-          {/* Tile Grid */}
-          <div
-            className="absolute inset-0 opacity-[0.05] pointer-events-none"
-            style={{
-              backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
-              backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
-            }}
-          />
+          <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
+               style={{
+                 backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
+                 backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
+               }} />
 
-          {/* Children (Avatars, NPCs, etc) */}
-          <div className="absolute inset-0">
-            {children}
-          </div>
+          {children}
 
-          {/* 3D Structural Walls (At the edges of playable area) */}
-          <div className="absolute top-0 left-0 right-0 h-64 bg-slate-800 border-b-8 border-cyan-500/20" 
+          {/* 3D Boundaries */}
+          <div className="absolute top-0 left-0 right-0 h-96 bg-slate-800 border-b-8 border-cyan-500/20" 
                style={{ transform: 'rotateX(-90deg)', transformOrigin: 'top' }} />
-          <div className="absolute top-0 right-0 bottom-0 w-64 bg-slate-850 border-l-8 border-cyan-500/30" 
+          <div className="absolute top-0 right-0 bottom-0 w-96 bg-slate-850 border-l-8 border-cyan-500/20" 
                style={{ transform: 'rotateY(-90deg)', transformOrigin: 'right' }} />
         </div>
 
-        {/* Large External Floor (The Padding) */}
-        <div 
-          className="absolute inset-0 pointer-events-none" 
-          style={{ 
-            backgroundColor: '#0f172a',
-            backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 40px, #020617 40px, #020617 41px)',
-            transform: 'translateZ(-2px)',
-            opacity: 0.3
-          }} 
-        />
+        {/* Outer Floor (Padding) */}
+        <div className="absolute inset-0 pointer-events-none" 
+             style={{ 
+               backgroundColor: '#0f172a',
+               backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 40px, #020617 40px, #020617 41px)',
+               transform: 'translateZ(-10px)',
+               opacity: 0.5
+             }} />
       </div>
 
-      {/* Atmospheric Fog Overlay */}
       <div className="absolute inset-0 map-overlay-shadow pointer-events-none" />
     </div>
   );
