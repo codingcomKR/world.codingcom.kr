@@ -42,6 +42,7 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d' }: Ma
       <div className="absolute inset-0">
         {children}
       </div>
+      </div>
     </div>
   );
 }
