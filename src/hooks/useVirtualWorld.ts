@@ -2,11 +2,13 @@ import { useState, useCallback, useEffect } from 'react';
 import type { 
   VirtualCampusAdminSnapshot, 
   VirtualCampusActionPayload,
-  VirtualCampusAvatarDirection
+  VirtualCampusAvatarDirection,
+  VirtualCampusNpcDialoguePayload
 } from '../types/virtual-campus';
 
 export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) {
   const [data, setData] = useState<VirtualCampusAdminSnapshot | null>(initialData);
+  const [dialogue, setDialogue] = useState<VirtualCampusNpcDialoguePayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,11 +48,11 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       if (result.ok) {
         // Refresh data after successful action to sync state
         await refreshData();
+        return result;
       } else {
         setError(result.error || 'Action failed');
+        return result;
       }
-      
-      return result;
     } catch (err: any) {
       console.error('Action error:', err);
       setError(err.message);
@@ -67,6 +69,9 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
     mapCode: string,
     memberNo: string
   ) => {
+    // Close dialogue when moving
+    setDialogue(null);
+
     let nextX = currentX;
     let nextY = currentY;
 
@@ -102,20 +107,28 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
   }, [data, performAction]);
 
   const talkToNpc = useCallback(async (npcCode: string, memberNo: string) => {
-    return performAction({
+    const result = await performAction({
       action: 'talk_npc',
       memberNo,
       npcCode,
       scope: 'room'
     });
+
+    if (result.ok && result.dialogue) {
+      setDialogue(result.dialogue);
+    }
+    
+    return result;
   }, [performAction]);
 
   return {
     data,
+    dialogue,
     loading,
     error,
     moveAvatar,
     talkToNpc,
+    setDialogue,
     performAction,
     refreshData
   };

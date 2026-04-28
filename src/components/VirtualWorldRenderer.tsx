@@ -1,19 +1,40 @@
+import { useEffect, useState } from 'react';
 import type { VirtualCampusAdminSnapshot, VirtualCampusAvatarDirection } from '../types/virtual-campus';
 import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
 import CollisionLayer from './VirtualWorld/CollisionLayer';
+import DialoguePanel from './VirtualWorld/DialoguePanel';
 import { useVirtualWorld } from '../hooks/useVirtualWorld';
 
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
-  const { data, moveAvatar, talkToNpc } = useVirtualWorld(initialData);
+  const { data, dialogue, moveAvatar, talkToNpc, setDialogue } = useVirtualWorld(initialData);
+  const [selectedNpcCode, setSelectedNpcCode] = useState<string | null>(null);
 
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
   const { currentMap, avatars, portals, collisionZones, npcs } = data.roomView;
   const { widthTiles, heightTiles } = currentMap;
   const myAvatar = data.memberView.avatar;
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't move if typing in an input or if dialogue is open
+      if (document.activeElement?.tagName === 'INPUT' || dialogue) return;
+
+      switch (e.key.toLowerCase()) {
+        case 'w': case 'arrowup': handleMove('up'); break;
+        case 's': case 'arrowdown': handleMove('down'); break;
+        case 'a': case 'arrowleft': handleMove('left'); break;
+        case 'd': case 'arrowright': handleMove('right'); break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [myAvatar, dialogue]); // Re-bind when state changes
 
   const handleMove = async (direction: VirtualCampusAvatarDirection) => {
     if (!myAvatar) return;
@@ -27,13 +48,15 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   };
 
   const handleNpcClick = async (npcCode: string) => {
+    setSelectedNpcCode(npcCode);
     await talkToNpc(npcCode, data.selectedMemberNo);
   };
 
   const handlePortalClick = (portalKey: string) => {
     console.log(`포탈 클릭: ${portalKey}`);
-    // 포탈 이동 로직은 나중에 추가
   };
+
+  const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto">
@@ -47,10 +70,8 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
       {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
       <MapLayer currentMap={currentMap}>
-        {/* 충돌 영역 레이어 (개발 시 확인용) */}
         <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
         
-        {/* 포탈 레이어 */}
         {portals.map(portal => (
           <PortalMarker 
             key={portal.id} 
@@ -61,16 +82,15 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           />
         ))}
 
-        {/* NPC 레이어 */}
         {npcs.map(npc => (
           <NpcMarker 
             key={npc.id} 
             npc={npc} 
+            isSelected={selectedNpcCode === npc.npcCode}
             onClick={() => handleNpcClick(npc.npcCode)}
           />
         ))}
 
-        {/* 아바타 레이어 */}
         <AvatarLayer 
           avatars={avatars} 
           selectedMemberNo={data.selectedMemberNo} 
@@ -78,6 +98,18 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           heightTiles={heightTiles} 
         />
       </MapLayer>
+
+      {/* 대화창 UI */}
+      {selectedNpc && (dialogue || selectedNpcCode) && (
+        <DialoguePanel 
+          npc={selectedNpc} 
+          dialogue={dialogue} 
+          onClose={() => {
+            setDialogue(null);
+            setSelectedNpcCode(null);
+          }} 
+        />
+      )}
 
       {/* 방향키 조작부 */}
       <div className="flex flex-col items-center gap-3 bg-slate-800/80 p-5 rounded-2xl border border-white/10 w-full max-w-sm">
