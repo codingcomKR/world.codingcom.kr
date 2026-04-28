@@ -1,5 +1,4 @@
 import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
-import { MAP_ACCENT } from '../../constants/virtual-campus';
 
 interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
