@@ -11,41 +11,33 @@ interface MapLayerProps {
 export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles } = currentMap;
   
-  // Calculate offset to keep player centered without nauseating shifts
-  const centerX = ((playerX + 0.5) / widthTiles) * 100;
-  const centerY = ((playerY + 0.5) / heightTiles) * 100;
+  const tileSize = 60; // 60px per tile
+  const playerX_px = (playerX + 0.5) * tileSize;
+  const playerY_px = (playerY + 0.5) * tileSize;
 
   // Determine map class based on mode
   const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
 
   return (
-    <div className="view-3d-container">
+    <div className="view-3d-container relative flex items-center justify-center">
       {/* The RPG Camera Plane */}
       <div
-        className={`relative ${mapClass}`}
+        className={`relative ${mapClass} transition-transform duration-500 ease-out`}
         style={{
-          width: '200vw',
-          height: '200vw', 
-          transformOrigin: `${centerX}% ${centerY}%`,
+          width: `${widthTiles * tileSize}px`,
+          height: `${heightTiles * tileSize}px`,
+          transformStyle: 'preserve-3d',
+          // Moving the map in the opposite direction of the player to keep player at screen center
+          transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3)' : 'rotateX(37deg) rotateZ(-45deg)'} translate(${(widthTiles * tileSize / 2) - playerX_px}px, ${(heightTiles * tileSize / 2) - playerY_px}px)`
         }}
       >
-        {/* Infinite Grid Background (Diablo/Starcraft feel) */}
-        <div 
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: 'linear-gradient(to right, #475569 1px, transparent 1px), linear-gradient(to bottom, #475569 1px, transparent 1px)',
-            backgroundSize: '100px 100px'
-          }}
-        />
-
         {/* The Actual Map Content */}
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          className="absolute inset-0"
           style={{
-            width: `${widthTiles * 60}px`,
-            aspectRatio: `${widthTiles} / ${heightTiles}`,
             backgroundColor: '#0f172a',
-            boxShadow: '0 0 100px rgba(0,0,0,0.5)',
+            boxShadow: '0 0 100px rgba(0,0,0,0.8)',
+            border: '1px solid rgba(255,255,255,0.05)'
           }}
         >
           {/* Grid Pattern */}
@@ -64,7 +56,7 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
         </div>
       </div>
 
-      {/* Atmospheric Fog Overlay (Prevents edge nausea) */}
+      {/* Atmospheric Fog Overlay */}
       <div className="absolute inset-0 map-overlay-shadow" />
     </div>
   );
