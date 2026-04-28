@@ -1,26 +1,38 @@
-import type { VirtualCampusAdminSnapshot } from '../types/virtual-campus';
+import type { VirtualCampusAdminSnapshot, VirtualCampusAvatarDirection } from '../types/virtual-campus';
 import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
 import CollisionLayer from './VirtualWorld/CollisionLayer';
+import { useVirtualWorld } from '../hooks/useVirtualWorld';
 
-export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdminSnapshot }) {
+export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
+  const { data, moveAvatar, talkToNpc } = useVirtualWorld(initialData);
+
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
   const { currentMap, avatars, portals, collisionZones, npcs } = data.roomView;
   const { widthTiles, heightTiles } = currentMap;
+  const myAvatar = data.memberView.avatar;
 
-  const handleMove = (direction: string) => {
-    console.log(`이동 요청: [${direction}]`);
+  const handleMove = async (direction: VirtualCampusAvatarDirection) => {
+    if (!myAvatar) return;
+    await moveAvatar(
+      direction, 
+      myAvatar.positionX, 
+      myAvatar.positionY, 
+      currentMap.mapCode, 
+      data.selectedMemberNo
+    );
   };
 
-  const handleNpcClick = (npcCode: string) => {
-    console.log(`NPC 클릭: ${npcCode}`);
+  const handleNpcClick = async (npcCode: string) => {
+    await talkToNpc(npcCode, data.selectedMemberNo);
   };
 
   const handlePortalClick = (portalKey: string) => {
     console.log(`포탈 클릭: ${portalKey}`);
+    // 포탈 이동 로직은 나중에 추가
   };
 
   return (
@@ -61,7 +73,7 @@ export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdmi
         {/* 아바타 레이어 */}
         <AvatarLayer 
           avatars={avatars} 
-          selectedMemberNo={data.selectedMemberNo || ''} 
+          selectedMemberNo={data.selectedMemberNo} 
           widthTiles={widthTiles} 
           heightTiles={heightTiles} 
         />
@@ -70,11 +82,11 @@ export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdmi
       {/* 방향키 조작부 */}
       <div className="flex flex-col items-center gap-3 bg-slate-800/80 p-5 rounded-2xl border border-white/10 w-full max-w-sm">
         <p className="text-xs text-cyan-200/70 font-semibold tracking-widest uppercase mb-1">Movement Controls</p>
-        <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('UP')}>↑ (W)</button>
+        <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('up')}>↑ (W)</button>
         <div className="flex gap-3">
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('LEFT')}>← (A)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('DOWN')}>↓ (S)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('RIGHT')}>→ (D)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('left')}>← (A)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('down')}>↓ (S)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('right')}>→ (D)</button>
         </div>
       </div>
     </div>

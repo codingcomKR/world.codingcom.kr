@@ -162,3 +162,32 @@ export interface VirtualCampusAdminSnapshot {
     oxSurvivalGates: any[];
   };
 }
+
+export type VirtualCampusAction = 
+  | 'move_avatar'
+  | 'talk_npc'
+  | 'accept_quest'
+  | 'purchase_item'
+  | 'equip_item'
+  | 'unequip_item'
+  | 'answer_ox_gate'
+  | 'start_ox_coop'
+  | 'warrior_attack'
+  | 'mage_heal'
+  | 'tick_ox_coop';
+
+export interface VirtualCampusActionPayload {
+  action: VirtualCampusAction;
+  memberNo: string;
+  mapCode?: string;
+  positionX?: number;
+  positionY?: number;
+  facingDirection?: VirtualCampusAvatarDirection;
+  npcCode?: string;
+  questCode?: string;
+  itemCode?: string;
+  slotKey?: string;
+  gateKey?: string;
+  answerValue?: boolean;
+  scope?: string;
+}
