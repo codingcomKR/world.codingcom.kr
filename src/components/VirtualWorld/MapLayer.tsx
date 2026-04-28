@@ -19,10 +19,16 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
   const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
 
   return (
-    <div className="view-3d-container relative flex items-center justify-center bg-[#020617]">
-      {/* Infinite Polished Floor Base */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none" 
-           style={{ background: 'radial-gradient(circle at center, #1e293b 0%, #020617 100%)' }} />
+    <div className="view-3d-container relative flex items-center justify-center bg-[#0f172a]">
+      {/* 1. Seamless Infinite Floor (Covers everything beyond the map) */}
+      <div 
+        className="absolute inset-[-500vw] opacity-100 pointer-events-none" 
+        style={{ 
+          backgroundColor: '#0f172a',
+          backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 20px, #131c31 20px, #131c31 22px)',
+          transform: 'translateZ(-1px)' // Ensure it's under everything
+        }} 
+      />
 
       {/* The RPG Camera Plane */}
       <div
@@ -34,22 +40,31 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
           transform: `${viewMode === '3d' ? 'rotateX(85deg) scale(3)' : 'rotateX(37deg) rotateZ(-45deg)'} translate(${(widthTiles * tileSize / 2) - playerX_px}px, ${(heightTiles * tileSize / 2) - playerY_px}px)`
         }}
       >
-        {/* Building Walls (3D Effect) */}
-        <div className="absolute -inset-8 border-[32px] border-slate-900/80 rounded-sm shadow-[inset_0_0_50px_rgba(0,0,0,0.9)]" 
-             style={{ transform: 'translateZ(20px)' }} />
-        
-        {/* The Actual Map Content */}
+        {/* 2. 3D Structural Walls (The Boundary) */}
+        {/* North Wall */}
+        <div className="absolute top-0 left-0 right-0 h-16 bg-slate-800 border-b-4 border-cyan-500/20" 
+             style={{ transform: 'rotateX(-90deg)', transformOrigin: 'top' }} />
+        {/* South Wall */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-slate-900 border-t-4 border-cyan-500/20" 
+             style={{ transform: 'rotateX(90deg)', transformOrigin: 'bottom' }} />
+        {/* West Wall */}
+        <div className="absolute top-0 left-0 bottom-0 w-16 bg-slate-850 border-r-4 border-cyan-500/20" 
+             style={{ transform: 'rotateY(90deg)', transformOrigin: 'left' }} />
+        {/* East Wall */}
+        <div className="absolute top-0 right-0 bottom-0 w-16 bg-slate-850 border-l-4 border-cyan-500/20" 
+             style={{ transform: 'rotateY(-90deg)', transformOrigin: 'right' }} />
+
+        {/* 3. The Playable Map Floor */}
         <div
           className="absolute inset-0"
           style={{
             backgroundColor: '#0f172a',
             backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 10px, #1e293b 10px, #1e293b 11px)',
-            boxShadow: '0 0 100px rgba(0,0,0,1)',
           }}
         >
-          {/* Tile Grid */}
+          {/* Tile Grid (Subtle) */}
           <div
-            className="absolute inset-0 opacity-[0.05] pointer-events-none"
+            className="absolute inset-0 opacity-[0.08] pointer-events-none"
             style={{
               backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
               backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
@@ -63,8 +78,8 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
         </div>
       </div>
 
-      {/* High-end Vignette & Fog */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_20%,rgba(2,6,23,0.9)_100%)]" />
+      {/* Atmospheric Lighting (Vignette) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(2,6,23,0.4)_100%)]" />
     </div>
   );
 }
