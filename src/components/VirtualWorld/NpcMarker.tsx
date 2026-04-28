@@ -5,7 +5,7 @@ interface NpcMarkerProps {
   isSelected?: boolean;
   canTalk?: boolean;
   previewText?: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
 }
 
 export default function NpcMarker({

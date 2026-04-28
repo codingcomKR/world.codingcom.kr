@@ -4,7 +4,7 @@ interface PortalMarkerProps {
   portal: VirtualCampusPortalSummary;
   label?: string;
   styleClass?: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   widthTiles: number;
   heightTiles: number;
 }
