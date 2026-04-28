@@ -4,6 +4,7 @@ import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
+import CollisionLayer from './VirtualWorld/CollisionLayer';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
 import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
@@ -131,6 +132,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
         <MapLayer currentMap={currentMap} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
+          <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
           {portals.map(portal => (
             <PortalMarker key={portal.id} portal={portal} widthTiles={widthTiles} heightTiles={heightTiles} onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }} />
           ))}
