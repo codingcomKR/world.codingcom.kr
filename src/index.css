@@ -1,4 +1,6 @@
-@import "tailwindcss/index.css";
+@import "tailwindcss";
+@config "../tailwind.config.js";
+@source "./**/*.{js,ts,jsx,tsx}";
 
 /* Custom theme variables and base styles can be added here */
 @layer base {
