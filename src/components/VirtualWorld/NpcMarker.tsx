@@ -45,14 +45,20 @@ export default function NpcMarker({
       )}
       
       <div
-        className={`flex h-11 w-11 items-center justify-center rounded-[18px] border-2 text-[11px] font-black transition-all duration-300 ${
+        className={`flex h-11 w-11 items-center justify-center rounded-[18px] border-2 transition-all duration-300 relative overflow-hidden ${
           isSelected
-            ? 'scale-110 border-white shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-            : 'border-black/20 group-hover:border-white/50 group-hover:scale-105'
+            ? 'scale-110 border-white shadow-[0_0_30px_rgba(255,255,255,0.4)]'
+            : 'border-white/20 group-hover:border-white/50 group-hover:scale-105 shadow-lg'
         }`}
-        style={{ backgroundColor: npc.paletteColor, color: npc.accentColor }}
+        style={{ backgroundColor: npc.paletteColor }}
       >
-        NPC
+        {/* Interior Detail for Character feel */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{ background: `radial-gradient(circle at top, ${npc.accentColor}, transparent)` }}
+        />
+        <div className="w-5 h-5 rounded-full bg-white/90 shadow-inner z-10" />
+        <div className="absolute bottom-0 w-8 h-4 rounded-t-full bg-white/20 z-0" />
       </div>
       
       {canTalk && (

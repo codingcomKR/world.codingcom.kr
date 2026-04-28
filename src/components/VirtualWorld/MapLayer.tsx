@@ -10,15 +10,28 @@ export default function MapLayer({ currentMap, children }: MapLayerProps) {
 
   return (
     <div
-      className="relative bg-slate-900 border-2 border-cyan-700/50 rounded-xl overflow-hidden shadow-[0_0_30px_rgba(15,23,42,0.8)]"
+      className="relative bg-[#020617] border-2 border-cyan-700/50 rounded-[26px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]"
       style={{
         width: '100%',
         aspectRatio: `${widthTiles} / ${heightTiles}`,
-        backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)',
-        backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
+        background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
       }}
     >
-      {children}
+      {/* Premium Grid Pattern */}
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
+        }}
+      />
+
+      {/* Decorative Floor Light */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(34,211,238,0.15)_0%,transparent_70%)] pointer-events-none" />
+
+      <div className="absolute inset-0">
+        {children}
+      </div>
     </div>
   );
 }
