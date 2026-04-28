@@ -169,121 +169,111 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-2 lg:p-4 font-sans selection:bg-cyan-500/30">
-      <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
-        {/* Map Area */}
-        <div className="lg:col-span-10 flex flex-col gap-4">
-          {/* Map Information Header */}
-          <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
-            <div className="flex flex-col">
-              <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
-              <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setViewMode(prev => prev === '2.5d' ? '3d' : '2.5d')}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 font-bold text-[10px] uppercase tracking-wider ${
-                  viewMode === '3d' 
-                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.3)]' 
-                    : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500'
-                }`}
-              >
-                <div className={`w-2 h-2 rounded-full ${viewMode === '3d' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
-                {viewMode === '3d' ? '3D VIEW' : '2.5D VIEW'}
-              </button>
-              
-              <div className="text-slate-300 text-sm font-semibold px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
-                접속 중: {avatars.length}명
-              </div>
-            </div>
+    <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
+      {/* Full Screen Map Layer */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <MapLayer 
+          currentMap={currentMap} 
+          viewMode={viewMode}
+          playerX={myAvatar?.positionX}
+          playerY={myAvatar?.positionY}
+        >
+          <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
+          
+          {portals.map(portal => (
+            <PortalMarker 
+              key={portal.id} 
+              portal={portal} 
+              widthTiles={widthTiles} 
+              heightTiles={heightTiles}
+              onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }}
+            />
+          ))}
+
+          {npcs.map(npc => (
+            <NpcMarker 
+              key={npc.id} 
+              npc={npc} 
+              isSelected={selectedNpcCode === npc.npcCode}
+              onClick={(e) => { handleNpcClick(npc.npcCode, e); }}
+            />
+          ))}
+
+          <AvatarLayer 
+            avatars={avatars} 
+            selectedMemberNo={data.selectedMemberNo} 
+            widthTiles={widthTiles} 
+            heightTiles={heightTiles} 
+            viewMode={viewMode}
+          />
+        </MapLayer>
+      </div>
+
+      {/* Floating HUD Interface */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top Header */}
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
+          <div className="flex flex-col gap-1 bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="text-cyan-400 font-black text-xl tracking-tight leading-none">{currentMap.title}</div>
+            <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
           </div>
 
-          {/* Map Grid and Click Area */}
-          <div className="relative cursor-crosshair group overflow-hidden rounded-[28px]" onClick={handleMapClick}>
-            <MapLayer 
-              currentMap={currentMap} 
-              viewMode={viewMode}
-              playerX={myAvatar?.positionX}
-              playerY={myAvatar?.positionY}
+          <div className="flex gap-4">
+            <button 
+              onClick={() => setViewMode(prev => prev === '2.5d' ? '3d' : '2.5d')}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl border transition-all duration-300 font-black text-xs uppercase tracking-widest ${
+                viewMode === '3d' 
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.3)]' 
+                  : 'bg-slate-900/80 border-white/10 text-slate-400 hover:border-white/30 backdrop-blur-md'
+              }`}
             >
-              <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
-              
-              {portals.map(portal => (
-                <PortalMarker 
-                  key={portal.id} 
-                  portal={portal} 
-                  widthTiles={widthTiles} 
-                  heightTiles={heightTiles}
-                  onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }}
-                />
-              ))}
-
-              {npcs.map(npc => (
-                <NpcMarker 
-                  key={npc.id} 
-                  npc={npc} 
-                  isSelected={selectedNpcCode === npc.npcCode}
-                  onClick={(e) => { handleNpcClick(npc.npcCode, e); }}
-                />
-              ))}
-
-              <AvatarLayer 
-                avatars={avatars} 
-                selectedMemberNo={data.selectedMemberNo} 
-                widthTiles={widthTiles} 
-                heightTiles={heightTiles} 
-                viewMode={viewMode}
-              />
-            </MapLayer>
-
-            {/* 대화창 UI */}
-            {selectedNpc && (dialogue || selectedNpcCode) && (
-              <DialoguePanel 
-                npc={selectedNpc} 
-                dialogue={dialogue} 
-                onClose={() => {
-                  setDialogue(null);
-                  setSelectedNpcCode(null);
-                }} 
-              />
-            )}
-          </div>
-
-          {/* 하단 조작부 및 정보 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-800/60 backdrop-blur-md p-6 rounded-3xl border border-white/5 shadow-lg">
-              <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-4 px-1">Navigation</h4>
-              <div className="flex flex-col items-center gap-3">
-                <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('up')}>↑</button>
-                <div className="flex gap-3">
-                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('left')}>←</button>
-                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('down')}>↓</button>
-                  <button className="w-16 h-16 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500/50 rounded-2xl text-xl transition-all shadow-lg active:scale-95" onClick={() => handleMove('right')}>→</button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-slate-800/60 backdrop-blur-md p-6 rounded-3xl border border-white/5 shadow-lg flex flex-col justify-center">
-              <div className="text-center space-y-2">
-                <div className="text-3xl">🎮</div>
-                <h4 className="text-sm font-black text-white uppercase tracking-tight">Keyboard Enabled</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Use <span className="text-cyan-400 font-bold">W, A, S, D</span> or <span className="text-cyan-400 font-bold">Arrow Keys</span><br />
-                  to move around the world.
-                </p>
-              </div>
+              {viewMode === '3d' ? 'Eye Level' : 'Isometric'}
+            </button>
+            <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl px-5 py-2.5 flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-black text-slate-300 tracking-widest">{avatars.length} PLAYERS</span>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Area */}
-        <div className="lg:col-span-2 flex flex-col gap-6 h-fit lg:sticky lg:top-8">
-          <QuestPanel data={data} />
-          <StatsPanel data={data} />
-          <InventoryPanel data={data} />
+        {/* Sidebar HUDs */}
+        <div className="absolute top-32 right-6 bottom-6 w-80 flex flex-col gap-4 pointer-events-auto overflow-y-auto no-scrollbar">
+          <div className="bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/5 p-1">
+            <QuestPanel data={data} />
+          </div>
+          <div className="bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/5 p-1">
+            <StatsPanel data={data} />
+          </div>
+          <div className="bg-slate-900/40 backdrop-blur-sm rounded-3xl border border-white/5 p-1">
+            <InventoryPanel data={data} />
+          </div>
         </div>
 
+        {/* 대화창 UI */}
+        {selectedNpc && (dialogue || selectedNpcCode) && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/40 backdrop-blur-sm">
+            <DialoguePanel 
+              npc={selectedNpc} 
+              dialogue={dialogue} 
+              onClose={() => {
+                setDialogue(null);
+                setSelectedNpcCode(null);
+              }} 
+            />
+          </div>
+        )}
+
+        {/* Bottom Controls Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl flex gap-8">
+          <div className="flex items-center gap-3">
+            <kbd className="px-2 py-1 bg-slate-800 rounded border border-white/20 text-[10px] font-black text-cyan-400">WASD</kbd>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Move</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <kbd className="px-2 py-1 bg-slate-800 rounded border border-white/20 text-[10px] font-black text-cyan-400">CLICK</kbd>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Interact</span>
+          </div>
+        </div>
       </div>
     </div>
   );
