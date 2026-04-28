@@ -27,6 +27,11 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
       // Don't move if typing in an input or if dialogue is open
       if (document.activeElement?.tagName === 'INPUT' || dialogue) return;
 
+      const keys = ['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+      if (keys.includes(e.key.toLowerCase())) {
+        e.preventDefault(); // Prevent page scrolling
+      }
+
       switch (e.key.toLowerCase()) {
         case 'w': case 'arrowup': handleMove('up'); break;
         case 's': case 'arrowdown': handleMove('down'); break;
