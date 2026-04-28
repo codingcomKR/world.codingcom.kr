@@ -151,17 +151,44 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     if (!myAvatar || dialogue) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Center-relative coordinates
+    const sx = e.clientX - (rect.left + rect.width / 2);
+    const sy = e.clientY - (rect.top + rect.height / 2);
 
-    const targetX = Math.floor((x / rect.width) * widthTiles);
-    const targetY = Math.floor((y / rect.height) * heightTiles);
+    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation)
+    // 1. Compensate for Tilt (X-axis)
+    const tiltScale = Math.cos(37 * Math.PI / 180);
+    const projectedY = sy / tiltScale;
 
-    const foundPath = findPath(myAvatar.positionX, myAvatar.positionY, targetX, targetY);
+    // 2. Compensate for Rotation (Z-axis -45deg)
+    const rotRad = -45 * Math.PI / 180;
+    const cosR = Math.cos(-rotRad);
+    const sinR = Math.sin(-rotRad);
+    
+    const worldX = sx * cosR - projectedY * sinR;
+    const worldY = sx * sinR + projectedY * cosR;
 
-    if (foundPath) {
+    // 3. Convert to Tile Coordinates
+    const tileSize = 60;
+    const playerX_px = (myAvatar.positionX + 0.5) * tileSize;
+    const playerY_px = (myAvatar.positionY + 0.5) * tileSize;
+
+    const targetX = Math.floor((worldX + playerX_px) / tileSize);
+    const targetY = Math.floor((worldY + playerY_px) / tileSize);
+
+    if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
+
+    const foundPath = findPath(
+      { x: Math.floor(myAvatar.positionX), y: Math.floor(myAvatar.positionY) },
+      { x: targetX, y: targetY },
+      collisionZones,
+      widthTiles,
+      heightTiles
+    );
+
+    if (foundPath && foundPath.length > 0) {
       for (const step of foundPath) {
-        moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
+        moveAvatar(step.dir, step.x, step.y, currentMap.mapCode, data.selectedMemberNo);
         await new Promise(r => setTimeout(r, 120));
       }
     }
