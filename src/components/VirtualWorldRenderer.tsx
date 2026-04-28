@@ -8,6 +8,7 @@ import CollisionLayer from './VirtualWorld/CollisionLayer';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
 import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
+import QuestPanel from './VirtualWorld/QuestPanel';
 import { useVirtualWorld } from '../hooks/useVirtualWorld';
 
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
@@ -54,8 +55,17 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     await talkToNpc(npcCode, data.selectedMemberNo);
   };
 
-  const handlePortalClick = (portalKey: string) => {
-    console.log(`포탈 클릭: ${portalKey}`);
+  const handlePortalClick = async (portalKey: string) => {
+    const portal = portals.find(p => p.sourcePortalKey === portalKey);
+    if (!portal) return;
+
+    await moveAvatar(
+      'down', // Initial direction in new map
+      portal.targetX,
+      portal.targetY,
+      portal.targetMapCode,
+      data.selectedMemberNo
+    );
   };
 
   const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
@@ -152,6 +162,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
         {/* Sidebar Area */}
         <div className="lg:col-span-4 flex flex-col gap-6 h-fit lg:sticky lg:top-8">
+          <QuestPanel data={data} />
           <StatsPanel data={data} />
           <InventoryPanel data={data} />
         </div>
