@@ -15,108 +15,78 @@ export default function AvatarMarker({
   downed,
   size = 'md',
 }: AvatarMarkerProps) {
-  const sizeClass = size === 'lg' ? 'h-20 w-20 rounded-[28px]' : 'h-14 w-14 rounded-[22px]';
-  const shellStateClass = moving
-    ? 'scale-[1.12] border-white shadow-[0_0_34px_rgba(125,211,252,0.24)]'
-    : selected
-      ? 'scale-110 border-white shadow-[0_0_30px_rgba(255,255,255,0.24)]'
-      : 'border-black/20';
-
-  const hatItem = avatar.equipment?.hat;
-  const toolItem = avatar.equipment?.tool;
-  const outfitItem = avatar.equipment?.outfit;
-  const badgeItem = avatar.equipment?.badge;
-  const hasHat = Boolean(hatItem);
-  const hasTool = Boolean(toolItem);
+  const isLg = size === 'lg';
+  const sizeClass = isLg ? 'h-24 w-16' : 'h-16 w-12';
+  
+  // Direction offset mapping for eyes and details
+  const dirOffset = {
+    up: { x: 0, y: -4 },
+    down: { x: 0, y: 4 },
+    left: { x: -6, y: 0 },
+    right: { x: 6, y: 0 }
+  }[avatar.facingDirection || 'down'];
 
   return (
-    <div className="relative group">
-      {/* Dynamic Glow Aura */}
-      <div 
-        className={`absolute -inset-4 rounded-full blur-2xl transition-all duration-700 opacity-0 group-hover:opacity-30 ${selected ? 'opacity-40 animate-pulse' : ''}`}
-        style={{ backgroundColor: avatar.paletteColor }}
-      />
-      
-      <div
-        className={`relative flex ${sizeClass} items-end justify-center overflow-hidden border-2 transition ${shellStateClass} ${downed ? 'grayscale opacity-75' : ''}`}
-        style={{ backgroundColor: avatar.paletteColor }}
-      >
-      {/* Background Glow */}
-      <div
-        className="absolute inset-0 opacity-80"
-        style={{
-          background: `radial-gradient(circle at top, ${avatar.accentColor}55 0%, ${avatar.paletteColor} 58%, rgba(15,23,42,0.82) 100%)`,
-        }}
-      />
-      
-      {/* Shadow */}
-      <div className="absolute inset-x-2 bottom-1 h-3 rounded-full bg-slate-950/25 blur-sm" />
-      
-      {/* Head/Face Area */}
-      <div
-        className={`absolute rounded-full border border-white/50 bg-white/90 ${size === 'lg' ? 'top-3 h-6 w-6' : 'top-2.5 h-[18px] w-[18px]'}`}
-        style={{ boxShadow: `0 0 16px ${avatar.accentColor}33` }}
-      />
-      
-      {/* Hat */}
-      {hasHat ? (
-        <div
-          className={`absolute rounded-full border ${size === 'lg' ? 'top-1.5 h-3 w-9' : 'top-1 h-2.5 w-7'}`}
-          style={{
-            backgroundColor: hatItem?.paletteColor || '#fcd34d',
-            borderColor: `${hatItem?.accentColor || '#422006'}aa`,
-          }}
+    <div className={`relative flex flex-col items-center group marker-3d ${moving ? 'animate-bounce' : ''}`}>
+      {/* Ground Shadow - Essential for 2.5D depth */}
+      <div className="absolute -bottom-1 w-full h-3 bg-black/40 rounded-[100%] blur-[4px] scale-x-110" />
+
+      {/* Main Body Container */}
+      <div className={`relative ${sizeClass} flex flex-col items-center transition-all duration-300`}>
+        {/* Glow Aura */}
+        <div 
+          className={`absolute inset-0 rounded-full blur-xl transition-opacity duration-700 ${selected ? 'opacity-40 animate-pulse' : 'opacity-0 group-hover:opacity-20'}`}
+          style={{ backgroundColor: avatar.paletteColor }}
         />
-      ) : null}
-      
-      {/* Outfit */}
-      <div
-        className={`absolute rounded-t-[999px] rounded-b-[14px] border border-white/20 ${size === 'lg' ? 'bottom-3 h-9 w-10' : 'bottom-2.5 h-6 w-7'}`}
-        style={{ backgroundColor: outfitItem?.paletteColor || '#0f172a' }}
-      />
-      
-      {/* Eyes (Simple dots) */}
-      <div className={`absolute rounded-full bg-slate-950/50 ${size === 'lg' ? 'bottom-1.5 left-[28%] h-2 w-2' : 'bottom-1 left-[28%] h-1.5 w-1.5'}`} />
-      <div className={`absolute rounded-full bg-slate-950/50 ${size === 'lg' ? 'bottom-1.5 right-[28%] h-2 w-2' : 'bottom-1 right-[28%] h-1.5 w-1.5'}`} />
-      
-      {/* Tool Badge or Initial */}
-      <div
-        className={`absolute right-1.5 top-1.5 rounded-full border px-1.5 py-0.5 text-[9px] font-black ${
-          hasTool
-            ? 'text-slate-950'
-            : 'border-white/20 bg-slate-950/40 text-white/80'
-        }`}
-        style={hasTool
-          ? {
-              backgroundColor: toolItem?.paletteColor || '#67e8f9',
-              borderColor: `${toolItem?.accentColor || '#083344'}aa`,
-            }
-          : undefined}
-      >
-        {hasTool ? toolItem?.badgeLabel || 'TOOL' : avatar.displayName.slice(0, 1)}
-      </div>
-      
-      {/* Badge Item */}
-      {badgeItem?.badgeLabel ? (
-        <div
-          className={`absolute left-1.5 rounded-full border px-1.5 py-0.5 text-[8px] font-black ${size === 'lg' ? 'bottom-1.5' : 'bottom-1'}`}
-          style={{
-            backgroundColor: badgeItem.paletteColor,
-            borderColor: `${badgeItem.accentColor}aa`,
-            color: badgeItem.accentColor,
+
+        {/* Head */}
+        <div 
+          className={`relative z-20 rounded-full border-2 border-white/30 shadow-xl transition-transform duration-300 ${isLg ? 'w-10 h-10 mb-[-4px]' : 'w-8 h-8 mb-[-3px]'}`}
+          style={{ 
+            backgroundColor: avatar.paletteColor,
+            transform: `translate(${dirOffset.x}px, ${dirOffset.y}px)`
           }}
         >
-          {badgeItem.badgeLabel}
+          {/* Eyes based on direction */}
+          <div className="absolute inset-0 flex items-center justify-center gap-1.5">
+            <div className={`w-1.5 h-1.5 bg-slate-900 rounded-full ${avatar.facingDirection === 'up' ? 'opacity-0' : 'opacity-80'}`} />
+            <div className={`w-1.5 h-1.5 bg-slate-900 rounded-full ${avatar.facingDirection === 'up' ? 'opacity-0' : 'opacity-80'}`} />
+          </div>
+          
+          {/* Hat (Optional Equipment) */}
+          {avatar.equipment?.hat && (
+            <div 
+              className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 rounded-full border border-white/20 shadow-sm"
+              style={{ backgroundColor: avatar.equipment.hat.paletteColor }}
+            />
+          )}
         </div>
-      ) : null}
-      
-      {/* Downed Overlay */}
-      {downed ? (
-        <div className={`absolute inset-x-2 rounded-full border border-rose-300/35 bg-rose-500/15 text-center font-black text-rose-100 ${size === 'lg' ? 'bottom-2 px-2 py-1 text-[10px]' : 'bottom-1.5 px-1.5 py-0.5 text-[8px]'}`}>
-          DOWN
+
+        {/* Body (Torso) */}
+        <div 
+          className={`relative z-10 w-full rounded-t-2xl rounded-b-lg border-2 border-white/20 shadow-lg ${isLg ? 'h-14' : 'h-10'}`}
+          style={{ 
+            backgroundColor: avatar.accentColor,
+            background: `linear-gradient(to bottom, ${avatar.accentColor}, ${avatar.paletteColor})`
+          }}
+        >
+          {/* Inner details for a "tech suit" feel */}
+          <div className="absolute inset-x-2 top-2 bottom-4 bg-white/10 rounded-lg" />
+          
+          {/* Badge */}
+          {avatar.equipment?.badge && (
+            <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-yellow-400 border border-white/40 shadow-sm animate-pulse" />
+          )}
         </div>
-      ) : null}
+
+        {/* Downed Overlay */}
+        {downed && (
+          <div className="absolute inset-0 z-30 bg-rose-950/40 rounded-full flex items-center justify-center">
+            <span className="text-[10px] font-black text-rose-200 rotate-[-15deg] border border-rose-400/50 px-1 bg-rose-900/80">DOWNED</span>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+}
 }
