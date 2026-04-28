@@ -97,13 +97,69 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
   const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
 
+  const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!myAvatar || dialogue) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const targetX = Math.floor((x / rect.width) * widthTiles);
+    const targetY = Math.floor((y / rect.height) * heightTiles);
+
+    // BFS Pathfinding
+    const queue: { x: number, y: number, path: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] }[] = [
+      { x: myAvatar.positionX, y: myAvatar.positionY, path: [] }
+    ];
+    const visited = new Set<string>();
+    visited.add(`${myAvatar.positionX},${myAvatar.positionY}`);
+
+    let foundPath: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] | null = null;
+
+    while (queue.length > 0) {
+      const { x, y, path } = queue.shift()!;
+
+      if (x === targetX && y === targetY) {
+        foundPath = path;
+        break;
+      }
+
+      const neighbors = [
+        { x: x, y: y - 1, dir: 'up' as const },
+        { x: x, y: y + 1, dir: 'down' as const },
+        { x: x - 1, y: y, dir: 'left' as const },
+        { x: x + 1, y: y, dir: 'right' as const },
+      ];
+
+      for (const next of neighbors) {
+        const key = `${next.x},${next.y}`;
+        if (
+          next.x >= 0 && next.x < widthTiles && 
+          next.y >= 0 && next.y < heightTiles && 
+          !visited.has(key) &&
+          !collisionZones.some(z => next.x >= z.originX && next.x < z.originX + z.widthTiles && next.y >= z.originY && next.y < z.originY + z.heightTiles)
+        ) {
+          visited.add(key);
+          queue.push({ x: next.x, y: next.y, path: [...path, next] });
+        }
+      }
+      if (queue.length > 1000) break; // Safety limit
+    }
+
+    if (foundPath) {
+      for (const step of foundPath) {
+        await moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
+        await new Promise(r => setTimeout(r, 100)); // Small delay for visual smoothness
+      }
+    }
+  };
+
   return (
-    <div className="w-full max-w-[1400px] mx-auto p-4 lg:p-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Main Canvas Area */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 lg:p-8 font-sans selection:bg-cyan-500/30">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Map Area */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          {/* 상단 맵 정보 헤더 */}
+          {/* Map Information Header */}
           <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
             <div className="flex flex-col">
               <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
@@ -115,8 +171,8 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
             </div>
           </div>
 
-          {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
-          <div className="relative">
+          {/* Map Grid and Click Area */}
+          <div className="relative cursor-crosshair group" onClick={handleMapClick}>
             <MapLayer currentMap={currentMap}>
               <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
               
