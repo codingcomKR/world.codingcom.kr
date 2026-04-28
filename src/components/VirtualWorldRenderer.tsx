@@ -158,10 +158,10 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 lg:p-6 font-sans selection:bg-cyan-500/30">
-      <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-2 lg:p-4 font-sans selection:bg-cyan-500/30">
+      <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
         {/* Map Area */}
-        <div className="lg:col-span-9 flex flex-col gap-6">
+        <div className="lg:col-span-10 flex flex-col gap-4">
           {/* Map Information Header */}
           <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
             <div className="flex flex-col">
@@ -247,7 +247,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         </div>
 
         {/* Sidebar Area */}
-        <div className="lg:col-span-4 flex flex-col gap-6 h-fit lg:sticky lg:top-8">
+        <div className="lg:col-span-2 flex flex-col gap-6 h-fit lg:sticky lg:top-8">
           <QuestPanel data={data} />
           <StatsPanel data={data} />
           <InventoryPanel data={data} />
