@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function VirtualWorldRenderer({ data }: { data: any }) {
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
@@ -17,7 +15,7 @@ export default function VirtualWorldRenderer({ data }: { data: any }) {
       </div>
 
       {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
-      <div 
+      <div
         className="relative bg-slate-900 border-2 border-cyan-700/50 rounded-xl overflow-hidden shadow-[0_0_30px_rgba(15,23,42,0.8)]"
         style={{
           width: '100%',
