@@ -165,14 +165,34 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         <div className="lg:col-span-10 flex flex-col gap-4">
           {/* Map Information Header */}
           <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
-            <div className="flex flex-col">
-              <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
-              <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                <div className="text-cyan-300 font-black text-xl tracking-tight leading-none mb-1">{currentMap.title}</div>
+                <div className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">{currentMap.mapCode}</div>
+              </div>
+              <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
+              <div className="text-slate-300 text-xs font-medium px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm hidden md:flex items-center">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
+                접속 중: {avatars.length}명
+              </div>
             </div>
-            <div className="text-slate-300 text-sm font-semibold px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
-              접속 중: {avatars.length}명
-            </div>
+
+            <button 
+              onClick={() => window.location.href = '/lobby'}
+              className="group relative flex items-center gap-3 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 rounded-xl border border-rose-500/30 hover:border-rose-500/60 transition-all duration-300 shadow-[0_0_15px_rgba(244,63,94,0.1)] active:scale-95"
+            >
+              <div className="flex flex-col items-end">
+                <span className="text-rose-400 font-black text-xs uppercase tracking-widest leading-none">Lobby</span>
+                <span className="text-[9px] text-rose-500/50 font-bold uppercase leading-none mt-1">Exit System</span>
+              </div>
+              <div className="p-1.5 bg-rose-500/10 rounded-lg group-hover:bg-rose-500/20 transition-colors">
+                <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              {/* Outer Glow Effect */}
+              <div className="absolute inset-0 rounded-xl bg-rose-500/0 group-hover:bg-rose-500/5 transition-all duration-300 pointer-events-none" />
+            </button>
           </div>
 
           {/* Map Grid and Click Area */}
