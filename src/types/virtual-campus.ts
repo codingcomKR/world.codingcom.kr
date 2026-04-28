@@ -97,6 +97,18 @@ export interface VirtualCampusEquippedItemSummary {
   badgeLabel: string | null;
 }
 
+export interface VirtualCampusNpcDialogueLine {
+  lineKey: string;
+  speakerName: string;
+  textContent: string;
+  sortOrder: number;
+}
+
+export interface VirtualCampusNpcDialoguePayload {
+  npc: VirtualCampusNpcSummary;
+  lines: VirtualCampusNpcDialogueLine[];
+}
+
 export interface VirtualCampusNpcSummary {
   id: number;
   npcCode: string;
