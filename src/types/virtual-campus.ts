@@ -131,26 +131,34 @@ export interface VirtualCampusQuestSummary {
 }
 
 export interface VirtualCampusAdminSnapshot {
+  ok: boolean;
   world: {
-    id: number;
-    worldCode: string;
-    title: string;
-    description: string;
-    visibility: 'admin_private' | 'member_private' | 'public';
-    rewardMode: 'sandbox' | 'live';
-    defaultSpawnMapCode: string;
+    id?: number;
+    worldCode?: string;
+    title?: string;
+    description?: string;
+    visibility?: string;
+    rewardMode?: string;
+    defaultSpawnMapCode?: string;
   };
-  selectedMemberNo?: string;
+  stats: Record<string, any>;
+  selectedMemberNo: string;
+  scopeApplied: string;
+  memberView: {
+    avatar: VirtualCampusAvatarSummary | null;
+    inventory: any[];
+    questProgress: any[];
+    oxSurvivalProgress: any[];
+    oxTrainingSession: any | null;
+    oxCoopSession: any | null;
+  };
   roomView: {
+    mapCode: string;
     currentMap: VirtualCampusMapSummary;
-    avatars: VirtualCampusAvatarSummary[];
     portals: VirtualCampusPortalSummary[];
     collisionZones: VirtualCampusCollisionZoneSummary[];
     npcs: VirtualCampusNpcSummary[];
+    avatars: VirtualCampusAvatarSummary[];
+    oxSurvivalGates: any[];
   };
-  maps: VirtualCampusMapSummary[];
-  portals: VirtualCampusPortalSummary[];
-  collisionZones: VirtualCampusCollisionZoneSummary[];
-  npcs: VirtualCampusNpcSummary[];
-  avatars: VirtualCampusAvatarSummary[];
 }

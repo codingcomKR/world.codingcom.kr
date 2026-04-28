@@ -1,15 +1,26 @@
 import type { VirtualCampusAdminSnapshot } from '../types/virtual-campus';
 import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
+import NpcMarker from './VirtualWorld/NpcMarker';
+import PortalMarker from './VirtualWorld/PortalMarker';
+import CollisionLayer from './VirtualWorld/CollisionLayer';
 
 export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdminSnapshot }) {
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
-  const { currentMap, avatars } = data.roomView;
+  const { currentMap, avatars, portals, collisionZones, npcs } = data.roomView;
   const { widthTiles, heightTiles } = currentMap;
 
   const handleMove = (direction: string) => {
     console.log(`이동 요청: [${direction}]`);
+  };
+
+  const handleNpcClick = (npcCode: string) => {
+    console.log(`NPC 클릭: ${npcCode}`);
+  };
+
+  const handlePortalClick = (portalKey: string) => {
+    console.log(`포탈 클릭: ${portalKey}`);
   };
 
   return (
@@ -24,11 +35,35 @@ export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdmi
 
       {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
       <MapLayer currentMap={currentMap}>
-        <AvatarLayer
-          avatars={avatars}
-          selectedMemberNo={data.selectedMemberNo || ''}
-          widthTiles={widthTiles}
-          heightTiles={heightTiles}
+        {/* 충돌 영역 레이어 (개발 시 확인용) */}
+        <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
+        
+        {/* 포탈 레이어 */}
+        {portals.map(portal => (
+          <PortalMarker 
+            key={portal.id} 
+            portal={portal} 
+            widthTiles={widthTiles} 
+            heightTiles={heightTiles}
+            onClick={() => handlePortalClick(portal.sourcePortalKey)}
+          />
+        ))}
+
+        {/* NPC 레이어 */}
+        {npcs.map(npc => (
+          <NpcMarker 
+            key={npc.id} 
+            npc={npc} 
+            onClick={() => handleNpcClick(npc.npcCode)}
+          />
+        ))}
+
+        {/* 아바타 레이어 */}
+        <AvatarLayer 
+          avatars={avatars} 
+          selectedMemberNo={data.selectedMemberNo || ''} 
+          widthTiles={widthTiles} 
+          heightTiles={heightTiles} 
         />
       </MapLayer>
 
