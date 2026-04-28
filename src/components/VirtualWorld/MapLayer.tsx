@@ -11,41 +11,59 @@ interface MapLayerProps {
 
 export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles, mapKind } = currentMap;
-  const accentColor = MAP_ACCENT[mapKind] || 'border-cyan-700/50';
-
-  const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-2-5d-map';
   
+  // Calculate offset to keep player centered without nauseating shifts
+  const centerX = ((playerX + 0.5) / widthTiles) * 100;
+  const centerY = ((playerY + 0.5) / heightTiles) * 100;
+
   return (
     <div className="view-3d-container">
+      {/* The RPG Camera Plane */}
       <div
-        className={`relative bg-[#020617] border-2 ${accentColor} rounded-[28px] overflow-visible shadow-[0_0_60px_rgba(0,0,0,0.9)] transition-all duration-1000 ${mapClass}`}
+        className="relative view-rpg-map"
         style={{
-          width: '100%',
-          aspectRatio: `${widthTiles} / ${heightTiles}`,
-          transformOrigin: `${((playerX + 0.5) / widthTiles) * 100}% ${((playerY + 0.5) / heightTiles) * 100}%`,
-          background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
+          width: '200vw', // Extra wide to hide edges during rotation
+          height: '200vw', 
+          transformOrigin: `${centerX}% ${centerY}%`,
         }}
       >
-      {/* Dynamic Grid Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.12] pointer-events-none"
-        style={{
-          backgroundImage: 'linear-gradient(to right, rgba(34,211,238,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(34,211,238,0.2) 1px, transparent 1px)',
-          backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
-        }}
-      />
+        {/* Infinite Grid Background (Diablo/Starcraft feel) */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: 'linear-gradient(to right, #475569 1px, transparent 1px), linear-gradient(to bottom, #475569 1px, transparent 1px)',
+            backgroundSize: '100px 100px'
+          }}
+        />
 
-      {/* Atmospheric Lighting */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-10%,rgba(34,211,238,0.25)_0%,transparent_80%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(15,23,42,0.5)_0%,transparent_100%)] pointer-events-none" />
-      
-      {/* Ground Scanline (Optional, for that tech feel) */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:100%_4px] pointer-events-none" />
+        {/* The Actual Map Content */}
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{
+            width: `${widthTiles * 60}px`,
+            aspectRatio: `${widthTiles} / ${heightTiles}`,
+            backgroundColor: '#0f172a',
+            boxShadow: '0 0 100px rgba(0,0,0,0.5)',
+          }}
+        >
+          {/* Grid Pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.1] pointer-events-none"
+            style={{
+              backgroundImage: 'linear-gradient(to right, rgba(34,211,238,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(34,211,238,0.2) 1px, transparent 1px)',
+              backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
+            }}
+          />
 
-      <div className="absolute inset-0">
-        {children}
+          {/* Map Content */}
+          <div className="absolute inset-0">
+            {children}
+          </div>
+        </div>
       </div>
-      </div>
+
+      {/* Atmospheric Fog Overlay (Prevents edge nausea) */}
+      <div className="absolute inset-0 map-overlay-shadow" />
     </div>
   );
 }
