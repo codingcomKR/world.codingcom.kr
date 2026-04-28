@@ -45,14 +45,10 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       
       const result = await res.json();
       
-      if (result.ok) {
-        // Refresh data after successful action to sync state
-        await refreshData();
-        return result;
-      } else {
+      if (!result.ok) {
         setError(result.error || 'Action failed');
-        return result;
       }
+      return result;
     } catch (err: any) {
       console.error('Action error:', err);
       setError(err.message);
@@ -82,18 +78,19 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       case 'right': nextX++; break;
     }
 
-    // Optimistic Update (Optional, but good for responsiveness)
-    if (data) {
-      const updatedAvatars = data.roomView.avatars.map(avatar => 
+    // Optimistic update with proper immutability
+    setData(prev => {
+      if (!prev) return prev;
+      const updatedAvatars = prev.roomView.avatars.map(avatar => 
         avatar.memberNo === memberNo 
           ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
           : avatar
       );
-      setData({
-        ...data,
-        roomView: { ...data.roomView, avatars: updatedAvatars }
-      });
-    }
+      return {
+        ...prev,
+        roomView: { ...prev.roomView, avatars: updatedAvatars }
+      };
+    });
 
     return performAction({
       action: 'move_avatar',
@@ -116,6 +113,8 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
 
     if (result.ok && result.dialogue) {
       setDialogue(result.dialogue);
+      // Dialogue might change quest status or stats, so refresh data
+      setData(result);
     } else if (result.ok && !result.dialogue) {
       setError('이 NPC는 현재 할 말이 없는 것 같습니다.');
       setDialogue(null);
