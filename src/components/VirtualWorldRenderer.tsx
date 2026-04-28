@@ -187,7 +187,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
                   portal={portal} 
                   widthTiles={widthTiles} 
                   heightTiles={heightTiles}
-                  onClick={(e) => handlePortalClick(portal.sourcePortalKey, e)}
+                  onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }}
                 />
               ))}
 
@@ -196,7 +196,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
                   key={npc.id} 
                   npc={npc} 
                   isSelected={selectedNpcCode === npc.npcCode}
-                  onClick={(e) => handleNpcClick(npc.npcCode, e)}
+                  onClick={(e) => { handleNpcClick(npc.npcCode, e); }}
                 />
               ))}
 
