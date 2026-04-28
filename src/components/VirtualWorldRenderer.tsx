@@ -169,13 +169,14 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const worldX = projectedX * cosR - projectedY * sinR;
     const worldY = projectedX * sinR + projectedY * cosR;
 
-    // 3. Convert to Tile Coordinates
-    const tileSize = 80; // Match MapLayer
-    const playerX_px = (myAvatar.positionX + 0.5) * tileSize;
-    const playerY_px = (myAvatar.positionY + 0.5) * tileSize;
+    // 3. Convert to Tile Coordinates (Adjust for Padding)
+    const tileSize = 80;
+    const paddingTiles = 8;
+    const playerX_px = (myAvatar.positionX + paddingTiles + 0.5) * tileSize;
+    const playerY_px = (myAvatar.positionY + paddingTiles + 0.5) * tileSize;
 
-    const targetX = Math.floor((worldX + playerX_px) / tileSize);
-    const targetY = Math.floor((worldY + playerY_px) / tileSize);
+    const targetX = Math.floor((worldX + playerX_px) / tileSize) - paddingTiles;
+    const targetY = Math.floor((worldY + playerY_px) / tileSize) - paddingTiles;
 
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
 
