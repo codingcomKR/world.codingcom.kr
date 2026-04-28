@@ -106,15 +106,22 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       } as VirtualCampusAdminSnapshot;
     });
 
-    return performAction({
+    const result = await performAction({
       action: 'move_avatar',
       memberNo,
-      mapCode,
+      mapCode: targetMapCode,
       positionX: nextX,
       positionY: nextY,
       facingDirection: direction,
       scope: 'room'
     });
+
+    // If map changed, we MUST refresh the full state
+    if (result.ok && targetMapCode !== mapCode) {
+      setData(result);
+    }
+
+    return result;
   }, [data, performAction]);
 
   const talkToNpc = useCallback(async (npcCode: string, memberNo: string) => {
