@@ -155,21 +155,22 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const sx = e.clientX - (rect.left + rect.width / 2);
     const sy = e.clientY - (rect.top + rect.height / 2);
 
-    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation)
-    // 1. Compensate for Tilt (X-axis)
+    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation, 1.2x scale)
+    const scale = 1.2;
     const tiltScale = Math.cos(37 * Math.PI / 180);
-    const projectedY = sy / tiltScale;
+    const projectedY = sy / (tiltScale * scale);
+    const projectedX = sx / scale;
 
     // 2. Compensate for Rotation (Z-axis -45deg)
     const rotRad = -45 * Math.PI / 180;
     const cosR = Math.cos(-rotRad);
     const sinR = Math.sin(-rotRad);
     
-    const worldX = sx * cosR - projectedY * sinR;
-    const worldY = sx * sinR + projectedY * cosR;
+    const worldX = projectedX * cosR - projectedY * sinR;
+    const worldY = projectedX * sinR + projectedY * cosR;
 
     // 3. Convert to Tile Coordinates
-    const tileSize = 60;
+    const tileSize = 80; // Match MapLayer
     const playerX_px = (myAvatar.positionX + 0.5) * tileSize;
     const playerY_px = (myAvatar.positionY + 0.5) * tileSize;
 
