@@ -171,7 +171,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   return (
     <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
       {/* Full Screen Map Layer */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
         <MapLayer 
           currentMap={currentMap} 
           viewMode={viewMode}
