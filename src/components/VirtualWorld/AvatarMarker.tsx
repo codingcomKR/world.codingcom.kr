@@ -30,10 +30,17 @@ export default function AvatarMarker({
   const hasTool = Boolean(toolItem);
 
   return (
-    <div
-      className={`relative flex ${sizeClass} items-end justify-center overflow-hidden border-2 transition ${shellStateClass} ${downed ? 'grayscale opacity-75' : ''}`}
-      style={{ backgroundColor: avatar.paletteColor }}
-    >
+    <div className="relative group">
+      {/* Dynamic Glow Aura */}
+      <div 
+        className={`absolute -inset-4 rounded-full blur-2xl transition-all duration-700 opacity-0 group-hover:opacity-30 ${selected ? 'opacity-40 animate-pulse' : ''}`}
+        style={{ backgroundColor: avatar.paletteColor }}
+      />
+      
+      <div
+        className={`relative flex ${sizeClass} items-end justify-center overflow-hidden border-2 transition ${shellStateClass} ${downed ? 'grayscale opacity-75' : ''}`}
+        style={{ backgroundColor: avatar.paletteColor }}
+      >
       {/* Background Glow */}
       <div
         className="absolute inset-0 opacity-80"
@@ -110,5 +117,6 @@ export default function AvatarMarker({
         </div>
       ) : null}
     </div>
-  );
+  </div>
+);
 }
