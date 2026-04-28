@@ -16,6 +16,8 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
   }, [initialData]);
 
   const refreshData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/virtual-campus');
       if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -23,10 +25,15 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       setData(json);
     } catch (err: any) {
       console.error('Data refresh error:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   const performAction = useCallback(async (payload: VirtualCampusActionPayload) => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/virtual-campus', {
         method: 'POST',
@@ -39,12 +46,17 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       if (result.ok) {
         // Refresh data after successful action to sync state
         await refreshData();
+      } else {
+        setError(result.error || 'Action failed');
       }
       
       return result;
     } catch (err: any) {
       console.error('Action error:', err);
+      setError(err.message);
       return { ok: false, error: err.message };
+    } finally {
+      setLoading(false);
     }
   }, [refreshData]);
 
