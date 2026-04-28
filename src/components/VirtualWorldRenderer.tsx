@@ -150,8 +150,6 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
     if (foundPath) {
       for (const step of foundPath) {
-    if (foundPath) {
-      for (const step of foundPath) {
         await moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
         // Removed delay for maximum speed
       }
