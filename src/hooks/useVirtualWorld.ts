@@ -81,13 +81,24 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
     // Optimistic update with proper immutability
     setData(prev => {
       if (!prev) return prev;
+      const isMyAvatar = (a: any) => a.memberNo === memberNo;
       const updatedAvatars = prev.roomView.avatars.map(avatar => 
-        avatar.memberNo === memberNo 
+        isMyAvatar(avatar) 
           ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
           : avatar
       );
+
       return {
         ...prev,
+        memberView: {
+          ...prev.memberView,
+          avatar: {
+            ...prev.memberView.avatar,
+            positionX: nextX,
+            positionY: nextY,
+            facingDirection: direction
+          }
+        },
         roomView: { ...prev.roomView, avatars: updatedAvatars }
       };
     });
