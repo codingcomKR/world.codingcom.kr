@@ -221,6 +221,8 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
               key={npc.id} 
               npc={npc} 
               isSelected={selectedNpcCode === npc.npcCode}
+              widthTiles={widthTiles}
+              heightTiles={heightTiles}
               onClick={(e) => { handleNpcClick(npc.npcCode, e); }}
             />
           ))}

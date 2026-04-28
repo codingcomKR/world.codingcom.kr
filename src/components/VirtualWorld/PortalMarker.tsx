@@ -21,13 +21,15 @@ export default function PortalMarker({
     <button
       type="button"
       onClick={onClick}
-      className={`absolute transition-all hover:scale-110 group flex items-center justify-center ${styleClass || ''}`}
+      className={`absolute transition-all hover:scale-110 group flex items-center justify-center z-50 ${styleClass || ''}`}
       style={{
         left: `${(portal.sourceX / widthTiles) * 100}%`,
         top: `${(portal.sourceY / heightTiles) * 100}%`,
         width: `${(portal.sourceWidthTiles / widthTiles) * 100}%`,
         height: `${(portal.sourceHeightTiles / heightTiles) * 100}%`,
         transformStyle: 'preserve-3d',
+        padding: '20px', // Invisible padding to increase hit area
+        margin: '-20px', // Offset padding to keep position correct
       }}
     >
       {/* Layered Cyber-Gate Rings */}

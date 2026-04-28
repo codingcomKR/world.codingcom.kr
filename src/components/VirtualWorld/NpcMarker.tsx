@@ -6,6 +6,8 @@ interface NpcMarkerProps {
   canTalk?: boolean;
   previewText?: string;
   onClick: (e: React.MouseEvent) => void;
+  widthTiles: number;
+  heightTiles: number;
 }
 
 export default function NpcMarker({
@@ -13,7 +15,9 @@ export default function NpcMarker({
   isSelected,
   canTalk,
   previewText,
-  onClick
+  onClick,
+  widthTiles,
+  heightTiles
 }: NpcMarkerProps) {
   const showSpeechBubble = isSelected || canTalk;
 
@@ -21,10 +25,10 @@ export default function NpcMarker({
     <button
       type="button"
       onClick={onClick}
-      className="absolute -translate-x-1/2 -translate-y-1/2 text-left group"
+      className="absolute -translate-x-1/2 -translate-y-1/2 text-left group z-50 billboard-rpg"
       style={{
-        left: `${(npc.positionX + 0.5)}px`, // 이 부분은 부모 컨테이너가 픽셀 기반일 때 기준, 퍼센트 기반이면 부모에서 계산
-        top: `${(npc.positionY + 0.5)}px`,
+        left: `${((npc.positionX + 0.5) / widthTiles) * 100}%`,
+        top: `${((npc.positionY + 0.5) / heightTiles) * 100}%`,
       }}
     >
       {showSpeechBubble && (
