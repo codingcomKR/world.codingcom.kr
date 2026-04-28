@@ -155,8 +155,8 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const sx = e.clientX - (rect.left + rect.width / 2);
     const sy = e.clientY - (rect.top + rect.height / 2);
 
-    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation, 1.2x scale)
-    const scale = 1.2;
+    // Inverse 2.5D Transformation math (37 deg tilt, 45 deg rotation, 1.4x scale)
+    const scale = 1.4;
     const tiltScale = Math.cos(37 * Math.PI / 180);
     const projectedY = sy / (tiltScale * scale);
     const projectedX = sx / scale;
