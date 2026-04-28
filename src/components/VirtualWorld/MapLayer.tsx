@@ -16,23 +16,18 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
   const HALF_WIDTH = TILE_WIDTH / 2;
   const HALF_HEIGHT = TILE_HEIGHT / 2;
 
-  // 1. Calculate Camera Position (Centered on Player)
+  // 1. Calculate Camera Position
   const playerScreenX = (playerX - playerY) * HALF_WIDTH;
   const playerScreenY = (playerX + playerY) * HALF_HEIGHT;
   const cx = -playerScreenX;
   const cy = -playerScreenY;
 
-  // 2. Define Floor Vertices (Relative to origin (0,0))
-  // Top: (0,0)
-  // Right: (W * HW, W * HH)
-  // Bottom: ((W-H) * HW, (W+H) * HH)
-  // Left: (-H * HW, H * HH)
+  // 2. Define Floor Vertices
   const topV = { x: 0, y: 0 };
   const rightV = { x: widthTiles * HALF_WIDTH, y: widthTiles * HALF_HEIGHT };
   const bottomV = { x: (widthTiles - heightTiles) * HALF_WIDTH, y: (widthTiles + heightTiles) * HALF_HEIGHT };
   const leftV = { x: -heightTiles * HALF_WIDTH, y: heightTiles * HALF_HEIGHT };
 
-  // Calculate bounding box for the floor container
   const minX = Math.min(topV.x, rightV.x, bottomV.x, leftV.x);
   const maxX = Math.max(topV.x, rightV.x, bottomV.x, leftV.x);
   const minY = Math.min(topV.y, rightV.y, bottomV.y, leftV.y);
@@ -55,9 +50,9 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           transformStyle: 'preserve-3d'
         }}
       >
-        {/* THE FLOOR POLYGON */}
+        {/* THE FLOOR */}
         <div 
-          className="absolute shadow-[0_80px_150px_rgba(0,0,0,0.9)]"
+          className="absolute shadow-[0_100px_200px_rgba(0,0,0,1)]"
           style={{
             width: `${floorWidth}px`,
             height: `${floorHeight}px`,
@@ -65,7 +60,6 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
             top: `${minY}px`,
             backgroundColor: '#0f172a',
             backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 20px, #131c31 20px, #131c31 22px)',
-            // Draw the exact diamond shape regardless of aspect ratio
             clipPath: `polygon(
               ${((topV.x - minX) / floorWidth) * 100}% ${((topV.y - minY) / floorHeight) * 100}%,
               ${((rightV.x - minX) / floorWidth) * 100}% ${((rightV.y - minY) / floorHeight) * 100}%,
@@ -74,7 +68,6 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
             )`
           }}
         >
-          {/* Subtle Grid overlay */}
           <div className="absolute inset-0 opacity-10 pointer-events-none"
                style={{
                  backgroundImage: `
@@ -82,50 +75,59 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
                    linear-gradient(63.5deg, transparent 49%, #64748b 50%, transparent 51%)
                  `,
                  backgroundSize: `${TILE_WIDTH}px ${TILE_HEIGHT}px`,
-                 backgroundPosition: `${(0 - minX)}px ${(0 - minY)}px`
+                 backgroundPosition: `${-minX}px ${-minY}px`
                }} />
         </div>
 
-        {/* THE WALLS (Anchored to the Top Point (0,0)) */}
-        {/* North-East Wall (Along X-axis) */}
-        <div 
-          className="absolute bg-gradient-to-b from-slate-800 to-slate-950 border-l border-cyan-500/20"
-          style={{
-            width: `${widthTiles * HALF_WIDTH}px`,
-            height: '240px',
-            left: '0px',
-            top: '0px',
-            transform: 'skewY(26.5deg) translateY(-100%)',
-            transformOrigin: 'bottom left',
-          }}
-        >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_15px_cyan]" />
+        {/* --- REAR WALLS (OPAQUE) --- */}
+        {/* North-East (Back-Right) */}
+        <div className="absolute bg-gradient-to-b from-slate-800 to-slate-950 border-l border-cyan-500/20"
+             style={{
+               width: `${widthTiles * HALF_WIDTH}px`, height: '280px',
+               left: '0', top: '0', transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
+             }}>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-400 shadow-[0_0_15px_cyan]" />
+        </div>
+        {/* North-West (Back-Left) */}
+        <div className="absolute bg-gradient-to-b from-slate-850 to-slate-950 border-r border-cyan-500/20"
+             style={{
+               width: `${heightTiles * HALF_WIDTH}px`, height: '280px',
+               left: '0', top: '0', transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
+             }}>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-400 shadow-[0_0_15px_cyan]" />
         </div>
 
-        {/* North-West Wall (Along Y-axis) */}
-        <div 
-          className="absolute bg-gradient-to-b from-slate-850 to-slate-950 border-r border-cyan-500/20"
-          style={{
-            width: `${heightTiles * HALF_WIDTH}px`,
-            height: '240px',
-            left: '0px',
-            top: '0px',
-            transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)',
-            transformOrigin: 'bottom left',
-          }}
-        >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_15px_cyan]" />
-        </div>
-
-        {/* CONTENT (SPRITES) */}
+        {/* CONTENT */}
         <div className="relative z-10">
           {children}
         </div>
+
+        {/* --- FRONT WALLS (TRANSPARENT GLASS) --- */}
+        {/* South-East (Front-Right) */}
+        <div className="absolute bg-white/5 border-l border-white/20 backdrop-blur-[2px]"
+             style={{
+               width: `${heightTiles * HALF_WIDTH}px`, height: '140px', // Shorter for visibility
+               left: `${rightV.x}px`, top: `${rightV.y}px`,
+               transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
+               zIndex: 100
+             }}>
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20" />
+        </div>
+        {/* South-West (Front-Left) */}
+        <div className="absolute bg-white/5 border-r border-white/20 backdrop-blur-[2px]"
+             style={{
+               width: `${widthTiles * HALF_WIDTH}px`, height: '140px', // Shorter for visibility
+               left: `${leftV.x}px`, top: `${leftV.y}px`,
+               transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
+               zIndex: 100
+             }}>
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20" />
+        </div>
+
       </div>
 
-      {/* Atmospheric Fog */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_30%,rgba(2,6,23,0.7)_100%)]" />
-      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.8)]" />
+      {/* Atmospheric FX */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(2,6,23,0.6)_100%)]" />
     </div>
   );
 }
