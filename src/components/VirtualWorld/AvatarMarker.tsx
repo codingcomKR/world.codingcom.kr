@@ -16,76 +16,85 @@ export default function AvatarMarker({
   size = 'md',
 }: AvatarMarkerProps) {
   const isLg = size === 'lg';
-  const sizeClass = isLg ? 'h-24 w-16' : 'h-16 w-12';
+  const sizeClass = isLg ? 'scale-125' : 'scale-100';
   
-  // Direction offset mapping for eyes and details
-  const dirOffset = {
-    up: { x: 0, y: -4 },
-    down: { x: 0, y: 4 },
-    left: { x: -6, y: 0 },
-    right: { x: 6, y: 0 }
-  }[avatar.facingDirection || 'down'];
+  // Flip character horizontally based on direction
+  const isFacingLeft = avatar.facingDirection === 'left';
 
   return (
-    <div className={`relative flex flex-col items-center group marker-3d ${moving ? 'animate-bounce' : ''}`}>
-      {/* Ground Shadow - Essential for 2.5D depth */}
-      <div className="absolute -bottom-1 w-full h-3 bg-black/40 rounded-[100%] blur-[4px] scale-x-110" />
+    <div className={`relative flex flex-col items-center group marker-3d ${sizeClass} transition-transform duration-300`}>
+      {/* Ground Shadow */}
+      <div className="absolute -bottom-1 w-10 h-3 bg-black/30 rounded-[100%] blur-[2px]" />
 
-      {/* Main Body Container */}
-      <div className={`relative ${sizeClass} flex flex-col items-center transition-all duration-300`}>
-        {/* Glow Aura */}
-        <div 
-          className={`absolute inset-0 rounded-full blur-xl transition-opacity duration-700 ${selected ? 'opacity-40 animate-pulse' : 'opacity-0 group-hover:opacity-20'}`}
-          style={{ backgroundColor: avatar.paletteColor }}
-        />
-
-        {/* Head */}
-        <div 
-          className={`relative z-20 rounded-full border-2 border-white/30 shadow-xl transition-transform duration-300 ${isLg ? 'w-10 h-10 mb-[-4px]' : 'w-8 h-8 mb-[-3px]'}`}
-          style={{ 
-            backgroundColor: avatar.paletteColor,
-            transform: `translate(${dirOffset.x}px, ${dirOffset.y}px)`
-          }}
-        >
-          {/* Eyes based on direction */}
-          <div className="absolute inset-0 flex items-center justify-center gap-1.5">
-            <div className={`w-1.5 h-1.5 bg-slate-900 rounded-full ${avatar.facingDirection === 'up' ? 'opacity-0' : 'opacity-80'}`} />
-            <div className={`w-1.5 h-1.5 bg-slate-900 rounded-full ${avatar.facingDirection === 'up' ? 'opacity-0' : 'opacity-80'}`} />
+      {/* Humanoid Skeleton */}
+      <div className={`relative w-12 h-20 flex flex-col items-center ${moving ? 'animate-body-bob' : ''} ${isFacingLeft ? 'scale-x-[-1]' : ''}`}>
+        
+        {/* Head & Hair */}
+        <div className="relative z-30 w-7 h-7 rounded-full bg-[#ffdbac] border border-black/10 shadow-sm flex items-center justify-center">
+          {/* Hair (Styled based on palette) */}
+          <div 
+            className="absolute -top-1 -inset-x-0.5 h-4 rounded-t-full rounded-b-sm"
+            style={{ backgroundColor: avatar.paletteColor }}
+          />
+          {/* Eyes */}
+          <div className="absolute top-3.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+            <div className="w-1 h-1 bg-black rounded-full" />
+            <div className="w-1 h-1 bg-black rounded-full" />
           </div>
-          
-          {/* Hat (Optional Equipment) */}
-          {avatar.equipment?.hat && (
-            <div 
-              className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-4 rounded-full border border-white/20 shadow-sm"
-              style={{ backgroundColor: avatar.equipment.hat.paletteColor }}
-            />
-          )}
         </div>
 
-        {/* Body (Torso) */}
+        {/* Torso / Shirt */}
         <div 
-          className={`relative z-10 w-full rounded-t-2xl rounded-b-lg border-2 border-white/20 shadow-lg ${isLg ? 'h-14' : 'h-10'}`}
+          className="relative z-20 w-8 h-8 -mt-1 rounded-sm border border-white/10 shadow-md"
           style={{ 
             backgroundColor: avatar.accentColor,
             background: `linear-gradient(to bottom, ${avatar.accentColor}, ${avatar.paletteColor})`
           }}
         >
-          {/* Inner details for a "tech suit" feel */}
-          <div className="absolute inset-x-2 top-2 bottom-4 bg-white/10 rounded-lg" />
-          
-          {/* Badge */}
-          {avatar.equipment?.badge && (
-            <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-yellow-400 border border-white/40 shadow-sm animate-pulse" />
-          )}
+          {/* Arms */}
+          <div 
+            className={`absolute -left-2 top-0 w-2.5 h-7 bg-[#ffdbac] rounded-full origin-top ${moving ? 'animate-walk-arm-l' : 'rotate-[10deg]'}`}
+            style={{ borderTop: `6px solid ${avatar.accentColor}` }}
+          />
+          <div 
+            className={`absolute -right-2 top-0 w-2.5 h-7 bg-[#ffdbac] rounded-full origin-top ${moving ? 'animate-walk-arm-r' : 'rotate-[-10deg]'}`}
+            style={{ borderTop: `6px solid ${avatar.accentColor}` }}
+          />
         </div>
 
-        {/* Downed Overlay */}
-        {downed && (
-          <div className="absolute inset-0 z-30 bg-rose-950/40 rounded-full flex items-center justify-center">
-            <span className="text-[10px] font-black text-rose-200 rotate-[-15deg] border border-rose-400/50 px-1 bg-rose-900/80">DOWNED</span>
+        {/* Legs / Pants */}
+        <div className="relative z-10 flex gap-1.5 -mt-0.5">
+          <div 
+            className={`w-3 h-8 bg-slate-800 rounded-b-sm origin-top ${moving ? 'animate-walk-leg-l' : ''}`}
+            style={{ borderTop: `4px solid ${avatar.paletteColor}` }}
+          >
+            {/* Shoe */}
+            <div className="absolute bottom-0 w-4 h-2 bg-slate-900 rounded-full -left-0.5" />
           </div>
+          <div 
+            className={`w-3 h-8 bg-slate-800 rounded-b-sm origin-top ${moving ? 'animate-walk-leg-r' : ''}`}
+            style={{ borderTop: `4px solid ${avatar.paletteColor}` }}
+          >
+            {/* Shoe */}
+            <div className="absolute bottom-0 w-4 h-2 bg-slate-900 rounded-full -left-0.5" />
+          </div>
+        </div>
+
+        {/* Glow (Selection) */}
+        {selected && (
+          <div 
+            className="absolute inset-0 rounded-full blur-2xl opacity-40 animate-pulse pointer-events-none"
+            style={{ backgroundColor: avatar.paletteColor }}
+          />
         )}
       </div>
+
+      {/* Downed Marker */}
+      {downed && (
+        <div className="absolute top-1/2 -translate-y-1/2 z-50 bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg">
+          ELIMINATED
+        </div>
+      )}
     </div>
   );
 }
