@@ -24,9 +24,14 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     } else {
       // 기본 데이터 조회 (GET)
-      // 클라이언트에서 넘겨준 쿼리 스트링이 있다면 그대로 전달 (예: memberNo)
-      const query = new URLSearchParams(req.query).toString();
-      const fetchUrl = `${baseUrl}/api/external/virtual-campus?${query || 'scope=room'}`;
+      const urlParams = new URLSearchParams(req.query);
+      if (!urlParams.has('memberNo')) {
+        urlParams.set('memberNo', '2026022302'); // 기본 테스트용 번호
+      }
+      if (!urlParams.has('scope')) {
+        urlParams.set('scope', 'room');
+      }
+      const fetchUrl = `${baseUrl}/api/external/virtual-campus?${urlParams.toString()}`;
 
       const response = await fetch(fetchUrl, {
         headers: {
