@@ -15,15 +15,19 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
   const mapWidth = widthTiles * tileSize;
   const mapHeight = heightTiles * tileSize;
 
-  // 1. Calculate ideal camera position (centered on player)
+  // 1. Calculate the raw camera position to center the player
   const idealX = (mapWidth / 2) - (playerX + 0.5) * tileSize;
   const idealY = (mapHeight / 2) - (playerY + 0.5) * tileSize;
 
-  // 2. Camera Clamping Logic
-  // In 2.5D, the map is rotated and scaled. We need enough padding to hide the void.
-  // We'll keep a simpler clamped translation for now.
-  const clampedX = idealX; 
-  const clampedY = idealY;
+  // 2. Deadzone & Clamping Logic
+  // We want the map to stay fixed as much as possible.
+  // We clamp the translate values so the map's edges never enter the viewport.
+  // Note: Due to 3D rotation, we use conservative bounds.
+  const maxShiftX = mapWidth * 0.15; // Allow only 15% shift to stay safe
+  const maxShiftY = mapHeight * 0.15;
+  
+  const clampedX = Math.max(-maxShiftX, Math.min(maxShiftX, idealX));
+  const clampedY = Math.max(-maxShiftY, Math.min(maxShiftY, idealY));
 
   const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
 
