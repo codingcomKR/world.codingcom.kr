@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import VirtualWorldRenderer from './VirtualWorldRenderer';
+import VirtualWorldRenderer from './components/VirtualWorldRenderer';
 
 export default function App() {
   const [data, setData] = useState<any>(null);
@@ -9,9 +9,7 @@ export default function App() {
   useEffect(() => {
     fetch('/api/virtual-campus')
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
       .then((json) => {
@@ -24,29 +22,12 @@ export default function App() {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#0a0a0a] text-white">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-          <h1 className="text-xl font-bold tracking-widest text-cyan-400 animate-pulse uppercase">Initialising System... 🚀</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-red-950 text-white">
-        <div className="p-8 border-2 border-red-500 rounded-2xl bg-black/50 backdrop-blur-xl text-center">
-          <h1 className="text-2xl font-black text-red-500 uppercase mb-4 tracking-tighter">System Error Detected</h1>
-          <p className="text-red-200/60 font-mono text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="flex h-screen items-center justify-center bg-slate-950 text-cyan-400 font-bold text-xl">데이터 동기화 중... 🚀</div>;
+  if (error) return <div className="flex h-screen items-center justify-center bg-slate-950 text-rose-400 font-bold text-xl">에러 발생: {error}</div>;
 
   return (
-    <VirtualWorldRenderer data={data} />
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#164e63_0%,#020617_48%,#020617_100%)] p-8 flex items-center justify-center">
+      <VirtualWorldRenderer data={data} />
+    </div>
   );
 }
