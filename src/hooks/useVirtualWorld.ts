@@ -88,19 +88,22 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
           : avatar
       );
 
+      // Safely update memberView only if avatar exists
+      const updatedMemberView = prev.memberView.avatar ? {
+        ...prev.memberView,
+        avatar: {
+          ...prev.memberView.avatar,
+          positionX: nextX,
+          positionY: nextY,
+          facingDirection: direction
+        }
+      } : prev.memberView;
+
       return {
         ...prev,
-        memberView: {
-          ...prev.memberView,
-          avatar: {
-            ...prev.memberView.avatar,
-            positionX: nextX,
-            positionY: nextY,
-            facingDirection: direction
-          }
-        },
+        memberView: updatedMemberView,
         roomView: { ...prev.roomView, avatars: updatedAvatars }
-      };
+      } as VirtualCampusAdminSnapshot;
     });
 
     return performAction({
