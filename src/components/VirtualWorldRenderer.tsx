@@ -14,6 +14,7 @@ import { useVirtualWorld } from '../hooks/useVirtualWorld';
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
   const { data, dialogue, moveAvatar, talkToNpc, setDialogue } = useVirtualWorld(initialData);
   const [selectedNpcCode, setSelectedNpcCode] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'2.5d' | '3d'>('2.5d');
 
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
@@ -178,15 +179,29 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
               <div className="text-cyan-300 font-black text-xl tracking-tight">{currentMap.title}</div>
               <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
             </div>
-            <div className="text-slate-300 text-sm font-semibold px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
-              접속 중: {avatars.length}명
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setViewMode(prev => prev === '2.5d' ? '3d' : '2.5d')}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 font-bold text-[10px] uppercase tracking-wider ${
+                  viewMode === '3d' 
+                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.3)]' 
+                    : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${viewMode === '3d' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
+                {viewMode === '3d' ? '3D VIEW' : '2.5D VIEW'}
+              </button>
+              
+              <div className="text-slate-300 text-sm font-semibold px-4 py-1.5 bg-slate-900/80 rounded-full border border-slate-700 backdrop-blur-sm">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
+                접속 중: {avatars.length}명
+              </div>
             </div>
           </div>
 
           {/* Map Grid and Click Area */}
           <div className="relative cursor-crosshair group" onClick={handleMapClick}>
-            <MapLayer currentMap={currentMap}>
+            <MapLayer currentMap={currentMap} viewMode={viewMode}>
               <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
               
               {portals.map(portal => (

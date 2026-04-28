@@ -4,15 +4,19 @@ import { MAP_ACCENT } from '../../constants/virtual-campus';
 interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
   children: React.ReactNode;
+  viewMode?: '2.5d' | '3d';
 }
 
-export default function MapLayer({ currentMap, children }: MapLayerProps) {
+export default function MapLayer({ currentMap, children, viewMode = '2.5d' }: MapLayerProps) {
   const { widthTiles, heightTiles, mapKind } = currentMap;
   const accentColor = MAP_ACCENT[mapKind] || 'border-cyan-700/50';
 
   return (
-    <div
-      className={`relative bg-[#020617] border-2 ${accentColor} rounded-[28px] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] transition-all duration-500`}
+    <div className={viewMode === '3d' ? 'view-3d-container' : ''}>
+      <div
+        className={`relative bg-[#020617] border-2 ${accentColor} rounded-[28px] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] transition-all duration-1000 ${
+          viewMode === '3d' ? 'view-3d-map' : ''
+        }`}
       style={{
         width: '100%',
         aspectRatio: `${widthTiles} / ${heightTiles}`,
