@@ -1,8 +1,16 @@
-export default function VirtualWorldRenderer({ data }: { data: any }) {
+import { VirtualCampusAdminSnapshot } from '../types/virtual-campus';
+import MapLayer from './VirtualWorld/MapLayer';
+import AvatarLayer from './VirtualWorld/AvatarLayer';
+
+export default function VirtualWorldRenderer({ data }: { data: VirtualCampusAdminSnapshot }) {
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
   const { currentMap, avatars } = data.roomView;
   const { widthTiles, heightTiles } = currentMap;
+
+  const handleMove = (direction: string) => {
+    console.log(`이동 요청: [${direction}]`);
+  };
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto">
@@ -15,44 +23,23 @@ export default function VirtualWorldRenderer({ data }: { data: any }) {
       </div>
 
       {/* 맵 타일 격자 및 캐릭터 렌더링 영역 */}
-      <div
-        className="relative bg-slate-900 border-2 border-cyan-700/50 rounded-xl overflow-hidden shadow-[0_0_30px_rgba(15,23,42,0.8)]"
-        style={{
-          width: '100%',
-          aspectRatio: `${widthTiles} / ${heightTiles}`,
-          backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)',
-          backgroundSize: `${100 / widthTiles}% ${100 / heightTiles}%`
-        }}
-      >
-        {/* 아바타 표시 */}
-        {avatars.map((avatar: any) => {
-          const isMe = avatar.memberNo === data.selectedMemberNo;
-          return (
-            <div
-              key={avatar.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300"
-              style={{
-                left: `${((avatar.positionX + 0.5) / widthTiles) * 100}%`,
-                top: `${((avatar.positionY + 0.5) / heightTiles) * 100}%`,
-              }}
-            >
-              <div className={`w-8 h-8 rounded-full border-2 ${isMe ? 'bg-cyan-400 border-white shadow-[0_0_20px_rgba(34,211,238,0.8)] z-10 scale-110' : 'bg-slate-600 border-slate-400'}`} />
-              <span className={`mt-1 text-[11px] font-bold px-2 py-0.5 rounded backdrop-blur-sm whitespace-nowrap ${isMe ? 'bg-cyan-900/80 text-cyan-50' : 'bg-black/70 text-slate-200'}`}>
-                {avatar.displayName}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      <MapLayer currentMap={currentMap}>
+        <AvatarLayer 
+          avatars={avatars} 
+          selectedMemberNo={data.world.worldCode /* 예시: 데이터 구조에 맞게 조정 */} 
+          widthTiles={widthTiles} 
+          heightTiles={heightTiles} 
+        />
+      </MapLayer>
 
       {/* 방향키 조작부 */}
       <div className="flex flex-col items-center gap-3 bg-slate-800/80 p-5 rounded-2xl border border-white/10 w-full max-w-sm">
         <p className="text-xs text-cyan-200/70 font-semibold tracking-widest uppercase mb-1">Movement Controls</p>
-        <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => console.log('위로 이동')}>↑ (W)</button>
+        <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('UP')}>↑ (W)</button>
         <div className="flex gap-3">
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => console.log('왼쪽으로 이동')}>← (A)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => console.log('아래로 이동')}>↓ (S)</button>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => console.log('오른쪽으로 이동')}>→ (D)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('LEFT')}>← (A)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('DOWN')}>↓ (S)</button>
+          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl text-white font-bold transition-colors shadow-lg" onClick={() => handleMove('RIGHT')}>→ (D)</button>
         </div>
       </div>
     </div>
