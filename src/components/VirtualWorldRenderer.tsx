@@ -46,6 +46,28 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
   const handleMove = async (direction: VirtualCampusAvatarDirection) => {
     if (!myAvatar) return;
+
+    let nextX = myAvatar.positionX;
+    let nextY = myAvatar.positionY;
+
+    if (direction === 'up') nextY--;
+    if (direction === 'down') nextY++;
+    if (direction === 'left') nextX--;
+    if (direction === 'right') nextX++;
+
+    // 1. Boundary Check
+    if (nextX < 0 || nextX >= widthTiles || nextY < 0 || nextY >= heightTiles) return;
+
+    // 2. Collision Zone Check
+    const isBlocked = collisionZones.some(zone => 
+      nextX >= zone.originX && 
+      nextX < zone.originX + zone.widthTiles &&
+      nextY >= zone.originY && 
+      nextY < zone.originY + zone.heightTiles
+    );
+
+    if (isBlocked) return;
+
     await moveAvatar(
       direction, 
       myAvatar.positionX, 
