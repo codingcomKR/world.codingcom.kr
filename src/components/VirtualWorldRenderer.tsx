@@ -77,17 +77,19 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     );
   };
 
-  const handleNpcClick = async (npcCode: string) => {
+  const handleNpcClick = async (npcCode: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedNpcCode(npcCode);
     await talkToNpc(npcCode, data.selectedMemberNo);
   };
 
-  const handlePortalClick = async (portalKey: string) => {
+  const handlePortalClick = async (portalKey: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const portal = portals.find(p => p.sourcePortalKey === portalKey);
     if (!portal) return;
 
     await moveAvatar(
-      'down', // Initial direction in new map
+      'down',
       portal.targetX,
       portal.targetY,
       portal.targetMapCode,
@@ -148,17 +150,20 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
 
     if (foundPath) {
       for (const step of foundPath) {
+    if (foundPath) {
+      for (const step of foundPath) {
         await moveAvatar(step.dir, step.x - (step.dir === 'left' ? -1 : step.dir === 'right' ? 1 : 0), step.y - (step.dir === 'up' ? -1 : step.dir === 'down' ? 1 : 0), currentMap.mapCode, data.selectedMemberNo);
-        await new Promise(r => setTimeout(r, 20)); // Faster movement
+        // Removed delay for maximum speed
       }
     }
   };
 
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 lg:p-6 font-sans selection:bg-cyan-500/30">
-      <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Map Area */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-9 flex flex-col gap-6">
           {/* Map Information Header */}
           <div className="flex justify-between items-center w-full px-6 py-4 bg-slate-800/80 rounded-2xl border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md">
             <div className="flex flex-col">
@@ -182,7 +187,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
                   portal={portal} 
                   widthTiles={widthTiles} 
                   heightTiles={heightTiles}
-                  onClick={() => handlePortalClick(portal.sourcePortalKey)}
+                  onClick={(e) => handlePortalClick(portal.sourcePortalKey, e)}
                 />
               ))}
 
@@ -191,7 +196,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
                   key={npc.id} 
                   npc={npc} 
                   isSelected={selectedNpcCode === npc.npcCode}
-                  onClick={() => handleNpcClick(npc.npcCode)}
+                  onClick={(e) => handleNpcClick(npc.npcCode, e)}
                 />
               ))}
 
