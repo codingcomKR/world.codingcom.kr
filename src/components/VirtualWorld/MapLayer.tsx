@@ -50,16 +50,19 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           transformStyle: 'preserve-3d'
         }}
       >
-        {/* THE FLOOR */}
+        {/* THE FLOOR (Lobby Foundation) */}
         <div 
-          className="absolute shadow-[0_100px_200px_rgba(0,0,0,1)]"
+          className="absolute shadow-[0_120px_250px_rgba(0,0,0,1)]"
           style={{
             width: `${floorWidth}px`,
             height: `${floorHeight}px`,
             left: `${minX}px`,
             top: `${minY}px`,
             backgroundColor: '#0f172a',
-            backgroundImage: 'repeating-linear-gradient(45deg, #0f172a 0, #0f172a 20px, #131c31 20px, #131c31 22px)',
+            backgroundImage: `
+              radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%),
+              repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 20px)
+            `,
             clipPath: `polygon(
               ${((topV.x - minX) / floorWidth) * 100}% ${((topV.y - minY) / floorHeight) * 100}%,
               ${((rightV.x - minX) / floorWidth) * 100}% ${((rightV.y - minY) / floorHeight) * 100}%,
@@ -68,66 +71,71 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
             )`
           }}
         >
-          <div className="absolute inset-0 opacity-10 pointer-events-none"
+          {/* Tile Grid for orientation */}
+          <div className="absolute inset-0 opacity-[0.15] pointer-events-none"
                style={{
                  backgroundImage: `
-                   linear-gradient(116.5deg, transparent 49%, #64748b 50%, transparent 51%),
-                   linear-gradient(63.5deg, transparent 49%, #64748b 50%, transparent 51%)
+                   linear-gradient(116.5deg, transparent 49%, #94a3b8 50%, transparent 51%),
+                   linear-gradient(63.5deg, transparent 49%, #94a3b8 50%, transparent 51%)
                  `,
                  backgroundSize: `${TILE_WIDTH}px ${TILE_HEIGHT}px`,
                  backgroundPosition: `${-minX}px ${-minY}px`
                }} />
         </div>
 
-        {/* --- REAR WALLS (OPAQUE) --- */}
-        {/* North-East (Back-Right) */}
-        <div className="absolute bg-gradient-to-b from-slate-800 to-slate-950 border-l border-cyan-500/20"
+        {/* --- REAR WALLS (Building Interior) --- */}
+        {/* North-East Wall (High Interior Wall) */}
+        <div className="absolute bg-[#1e293b] border-l-4 border-slate-700/50"
              style={{
-               width: `${widthTiles * HALF_WIDTH}px`, height: '280px',
+               width: `${widthTiles * HALF_WIDTH}px`, height: '320px',
                left: '0', top: '0', transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
              }}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-400 shadow-[0_0_15px_cyan]" />
+          {/* Interior Wall Decoration (Grid/Lights) */}
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#0f172a] shadow-inner" /> {/* Baseboard */}
+          <div className="absolute top-10 left-10 right-10 h-[1px] bg-cyan-500/30" /> {/* Tech line */}
         </div>
-        {/* North-West (Back-Left) */}
-        <div className="absolute bg-gradient-to-b from-slate-850 to-slate-950 border-r border-cyan-500/20"
+        
+        {/* North-West Wall (High Interior Wall) */}
+        <div className="absolute bg-[#1e293b] border-r-4 border-slate-700/50"
              style={{
-               width: `${heightTiles * HALF_WIDTH}px`, height: '280px',
+               width: `${heightTiles * HALF_WIDTH}px`, height: '320px',
                left: '0', top: '0', transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
              }}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-400 shadow-[0_0_15px_cyan]" />
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#0f172a] shadow-inner" />
+          <div className="absolute top-10 left-10 right-10 h-[1px] bg-orange-500/30" />
         </div>
 
-        {/* CONTENT */}
+        {/* CONTENT (The World Items) */}
         <div className="relative z-10">
           {children}
         </div>
 
-        {/* --- FRONT WALLS (TRANSPARENT GLASS) --- */}
-        {/* South-East (Front-Right) */}
-        <div className="absolute bg-white/5 border-l border-white/20 backdrop-blur-[2px]"
+        {/* --- FRONT "CURBS" (Very Low Boundaries for Lidless Effect) --- */}
+        {/* South-East Curb */}
+        <div className="absolute bg-[#0f172a] border-l border-slate-700/30"
              style={{
-               width: `${heightTiles * HALF_WIDTH}px`, height: '140px', // Shorter for visibility
+               width: `${heightTiles * HALF_WIDTH}px`, height: '12px', 
                left: `${rightV.x}px`, top: `${rightV.y}px`,
                transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                zIndex: 100
-             }}>
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20" />
-        </div>
-        {/* South-West (Front-Left) */}
-        <div className="absolute bg-white/5 border-r border-white/20 backdrop-blur-[2px]"
+             }} />
+        {/* South-West Curb */}
+        <div className="absolute bg-[#0f172a] border-r border-slate-700/30"
              style={{
-               width: `${widthTiles * HALF_WIDTH}px`, height: '140px', // Shorter for visibility
+               width: `${widthTiles * HALF_WIDTH}px`, height: '12px', 
                left: `${leftV.x}px`, top: `${leftV.y}px`,
                transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                zIndex: 100
-             }}>
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20" />
-        </div>
+             }} />
 
       </div>
 
-      {/* Atmospheric FX */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(2,6,23,0.6)_100%)]" />
+      {/* Atmospheric Lighting */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(2,6,23,0.5)_100%)]" />
+      {/* Depth vignette */}
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.8)]" />
     </div>
   );
 }
