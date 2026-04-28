@@ -4,7 +4,6 @@ import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
-import CollisionLayer from './VirtualWorld/CollisionLayer';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
 import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
@@ -14,7 +13,6 @@ import { useVirtualWorld } from '../hooks/useVirtualWorld';
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
   const { data, dialogue, moveAvatar, talkToNpc, setDialogue } = useVirtualWorld(initialData);
   const [selectedNpcCode, setSelectedNpcCode] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'2.5d' | '3d'>('2.5d');
 
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
@@ -108,7 +106,6 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const sx = e.clientX - (rect.left + rect.width / 2);
     const sy = e.clientY - (rect.top + rect.height / 2);
 
-    // Get current camera translation
     const cameraPlane = document.getElementById('rpg-camera-plane');
     const cx = Number(cameraPlane?.getAttribute('data-cx') || 0);
     const cy = Number(cameraPlane?.getAttribute('data-cy') || 0);
@@ -116,9 +113,6 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const screenX = sx - cx;
     const screenY = sy - cy;
 
-    // Inverse Isometric Projection (2:1 ratio)
-    // targetX = (screenX/64 + screenY/32) / 2
-    // targetY = (screenY/32 - screenX/64) / 2
     const targetX = Math.round((screenX / 64 + screenY / 32) / 2);
     const targetY = Math.round((screenY / 32 - screenX / 64) / 2);
 
@@ -136,18 +130,17 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   return (
     <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
-        <MapLayer currentMap={currentMap} viewMode={viewMode} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
+        <MapLayer currentMap={currentMap} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
           {portals.map(portal => (
             <PortalMarker key={portal.id} portal={portal} widthTiles={widthTiles} heightTiles={heightTiles} onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }} />
           ))}
           {npcs.map(npc => (
             <NpcMarker key={npc.id} npc={npc} isSelected={selectedNpcCode === npc.npcCode} widthTiles={widthTiles} heightTiles={heightTiles} onClick={(e) => { handleNpcClick(npc.npcCode, e); }} />
           ))}
-          <AvatarLayer avatars={avatars} selectedMemberNo={data.selectedMemberNo} widthTiles={widthTiles} heightTiles={heightTiles} viewMode={viewMode} />
+          <AvatarLayer avatars={avatars} selectedMemberNo={data.selectedMemberNo} widthTiles={widthTiles} heightTiles={heightTiles} />
         </MapLayer>
       </div>
 
-      {/* Floating HUD */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
           <div className="bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl">
@@ -161,6 +154,12 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           <StatsPanel data={data} />
           <InventoryPanel data={data} />
         </div>
+
+        {selectedNpc && dialogue && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/40 backdrop-blur-sm">
+            <DialoguePanel npc={selectedNpc} dialogue={dialogue} onClose={() => { setDialogue(null); setSelectedNpcCode(null); }} />
+          </div>
+        )}
       </div>
     </div>
   );

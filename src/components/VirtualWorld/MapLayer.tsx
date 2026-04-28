@@ -3,12 +3,11 @@ import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
 interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
   children: React.ReactNode;
-  viewMode?: '2.5d' | '3d';
   playerX?: number;
   playerY?: number;
 }
 
-export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
+export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles } = currentMap;
   
   // Standard 2:1 Isometric Tile dimensions (128x64)
