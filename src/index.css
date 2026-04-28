@@ -2,21 +2,34 @@
 
 @layer base {
   .view-3d-container {
-    perspective: 1500px;
+    perspective: 1000px;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
   }
   
-  .view-3d-map {
-    transform: rotateX(65deg) translateY(-5%) scale(1.1);
+  /* True 2.5D (Isometric Tilt) */
+  .view-2-5d-map {
+    transform: rotateX(45deg) rotateZ(-45deg) scale(0.8);
     transform-style: preserve-3d;
     transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .billboard,
-  .view-3d-map button,
-  .view-3d-map .marker-3d {
-    transform: rotateX(-65deg) translateY(-25%) !important;
-    transform-origin: bottom center;
+  /* True 1st Person (Eye Level) */
+  .view-1st-person-map {
+    transform: rotateX(85deg) translateY(-40%) scale(2.5);
+    transform-style: preserve-3d;
     transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .billboard-2-5d {
+    transform: rotateZ(45deg) rotateX(-45deg) translateY(-50%) !important;
+    transform-origin: bottom center;
+  }
+
+  .billboard-1st {
+    transform: rotateX(-90deg) translateY(-50%) !important;
+    transform-origin: bottom center;
   }
 
   /* Humanoid Walk Cycle */

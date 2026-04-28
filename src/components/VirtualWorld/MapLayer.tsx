@@ -5,24 +5,27 @@ interface MapLayerProps {
   currentMap: VirtualCampusMapSummary;
   children: React.ReactNode;
   viewMode?: '2.5d' | '3d';
+  playerX?: number;
+  playerY?: number;
 }
 
-export default function MapLayer({ currentMap, children, viewMode = '2.5d' }: MapLayerProps) {
+export default function MapLayer({ currentMap, children, viewMode = '2.5d', playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles, mapKind } = currentMap;
   const accentColor = MAP_ACCENT[mapKind] || 'border-cyan-700/50';
 
+  const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-2-5d-map';
+  
   return (
-    <div className={viewMode === '3d' ? 'view-3d-container' : ''}>
+    <div className="view-3d-container">
       <div
-        className={`relative bg-[#020617] border-2 ${accentColor} rounded-[28px] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] transition-all duration-1000 ${
-          viewMode === '3d' ? 'view-3d-map' : ''
-        }`}
-      style={{
-        width: '100%',
-        aspectRatio: `${widthTiles} / ${heightTiles}`,
-        background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
-      }}
-    >
+        className={`relative bg-[#020617] border-2 ${accentColor} rounded-[28px] overflow-visible shadow-[0_0_60px_rgba(0,0,0,0.9)] transition-all duration-1000 ${mapClass}`}
+        style={{
+          width: '100%',
+          aspectRatio: `${widthTiles} / ${heightTiles}`,
+          transformOrigin: `${((playerX + 0.5) / widthTiles) * 100}% ${((playerY + 0.5) / heightTiles) * 100}%`,
+          background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
+        }}
+      >
       {/* Dynamic Grid Pattern */}
       <div
         className="absolute inset-0 opacity-[0.12] pointer-events-none"

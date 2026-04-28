@@ -200,8 +200,13 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           </div>
 
           {/* Map Grid and Click Area */}
-          <div className="relative cursor-crosshair group" onClick={handleMapClick}>
-            <MapLayer currentMap={currentMap} viewMode={viewMode}>
+          <div className="relative cursor-crosshair group overflow-hidden rounded-[28px]" onClick={handleMapClick}>
+            <MapLayer 
+              currentMap={currentMap} 
+              viewMode={viewMode}
+              playerX={myAvatar?.positionX}
+              playerY={myAvatar?.positionY}
+            >
               <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
               
               {portals.map(portal => (
@@ -228,6 +233,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
                 selectedMemberNo={data.selectedMemberNo} 
                 widthTiles={widthTiles} 
                 heightTiles={heightTiles} 
+                viewMode={viewMode}
               />
             </MapLayer>
 
