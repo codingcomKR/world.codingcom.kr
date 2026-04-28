@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${process.env.EXTERNAL_API_TOKEN}`,
+        'X-External-Api-Key': process.env.EXTERNAL_API_TOKEN,
         'Content-Type': 'application/json'
       }
     });
