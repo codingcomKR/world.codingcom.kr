@@ -15,13 +15,16 @@ export default function MapLayer({ currentMap, children, viewMode = '2.5d', play
   const centerX = ((playerX + 0.5) / widthTiles) * 100;
   const centerY = ((playerY + 0.5) / heightTiles) * 100;
 
+  // Determine map class based on mode
+  const mapClass = viewMode === '3d' ? 'view-1st-person-map' : 'view-rpg-map';
+
   return (
     <div className="view-3d-container">
       {/* The RPG Camera Plane */}
       <div
-        className="relative view-rpg-map"
+        className={`relative ${mapClass}`}
         style={{
-          width: '200vw', // Extra wide to hide edges during rotation
+          width: '200vw',
           height: '200vw', 
           transformOrigin: `${centerX}% ${centerY}%`,
         }}
