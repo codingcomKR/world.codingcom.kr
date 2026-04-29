@@ -6,7 +6,7 @@ export const CAMPUS_SQUARE_MAP_CODE = 'CAMPUS_SQUARE';
 
 export const campusSquareCollisionZones: VirtualCampusCollisionZoneSummary[] = [
   // ── CENTRAL FOUNTAIN (Shrunk to allow walking around it freely) ──
-  { id: 1001, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'fountain',          label: '중앙 분수대',    zoneType: 'blocked', originX: 12, originY: 11, widthTiles: 4, heightTiles: 3, sortOrder: 1, isActive: true },
+  { id: 1001, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'fountain',          label: '중앙 분수대',    zoneType: 'blocked', originX: 11, originY: 9, widthTiles: 6, heightTiles: 6, sortOrder: 1, isActive: true },
   
   // ── 건물의 블록 영역 축소 (길을 더 넓게 쓰도록 위로/옆으로 바짝 붙임) ──
   { id: 1002, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'codingdong',        label: '코딩동',        zoneType: 'blocked', originX: 10,  originY: 0,  widthTiles: 8, heightTiles: 5, sortOrder: 2, isActive: true },
