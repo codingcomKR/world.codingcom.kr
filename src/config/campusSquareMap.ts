@@ -1,44 +1,32 @@
+import type { VirtualCampusCollisionZoneSummary } from '../types/virtual-campus';
+
 // Campus Square Map Data — 28x28 grid
 // Derived from visual analysis of public/assets/map_bg.png
-// (0,0) = top-left, (27,27) = bottom-right
-// Image: 3548x1774 → tileW ≈ 126.7px, tileH ≈ 63.4px
-
 export const CAMPUS_SQUARE_MAP_CODE = 'CAMPUS_SQUARE';
 
-// ─── COLLISION ZONES (buildings, trees, fountain, fences) ───────────────────
-// Format: { id, label, originX, originY, widthTiles, heightTiles }
-export const campusSquareCollisionZones = [
-
-  // ── CENTRAL FOUNTAIN (rows 10-17, cols 10-17) ──
-  { id: 'fountain', label: '중앙 분수대', originX: 11, originY: 10, widthTiles: 6, heightTiles: 5 },
-
-  // ── 코딩동 (top-center) ──
-  { id: 'codingdong', label: '코딩동', originX: 9, originY: 0, widthTiles: 10, heightTiles: 6 },
-
-  // ── 상점 (top-left) ──
-  { id: 'shop', label: '상점', originX: 0, originY: 2, widthTiles: 8, heightTiles: 7 },
-
-  // ── OX 퀴즈관 (top-right) ──
-  { id: 'ox_quiz', label: 'OX 생존퀴즈관', originX: 20, originY: 2, widthTiles: 8, heightTiles: 7 },
-
-  // ── 아바타관 (bottom-left) ──
-  { id: 'avatar_hall', label: '아바타관', originX: 0, originY: 14, widthTiles: 8, heightTiles: 8 },
-
-  // ── 미션센터 (bottom-right) ──
-  { id: 'mission_center', label: '미션센터', originX: 20, originY: 14, widthTiles: 8, heightTiles: 8 },
-
-  // ── 랭킹 타워 (far right) ──
-  { id: 'ranking_tower', label: '랭킹 타워', originX: 24, originY: 8, widthTiles: 4, heightTiles: 6 },
-
-  // ── 캠퍼스 정문 구조물 ──
-  { id: 'gate_left_pillar',  label: '정문 기둥', originX: 10, originY: 25, widthTiles: 2, heightTiles: 3 },
-  { id: 'gate_right_pillar', label: '정문 기둥', originX: 16, originY: 25, widthTiles: 2, heightTiles: 3 },
-
-  // ── 나무/울타리 (corners) ──
-  { id: 'trees_topleft',     label: '나무', originX: 0,  originY: 0,  widthTiles: 3, heightTiles: 3 },
-  { id: 'trees_topright',    label: '나무', originX: 25, originY: 0,  widthTiles: 3, heightTiles: 3 },
-  { id: 'trees_bottomleft',  label: '나무', originX: 0,  originY: 24, widthTiles: 3, heightTiles: 4 },
-  { id: 'trees_bottomright', label: '나무', originX: 25, originY: 24, widthTiles: 3, heightTiles: 4 },
+export const campusSquareCollisionZones: VirtualCampusCollisionZoneSummary[] = [
+  // ── CENTRAL FOUNTAIN ──
+  { id: 1001, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'fountain',          label: '중앙 분수대',    zoneType: 'blocked', originX: 11, originY: 10, widthTiles: 6, heightTiles: 5, sortOrder: 1, isActive: true },
+  // ── 코딩동 ──
+  { id: 1002, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'codingdong',        label: '코딩동',        zoneType: 'blocked', originX: 9,  originY: 0,  widthTiles: 10, heightTiles: 6, sortOrder: 2, isActive: true },
+  // ── 상점 ──
+  { id: 1003, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'shop',              label: '상점',          zoneType: 'blocked', originX: 0,  originY: 2,  widthTiles: 8,  heightTiles: 7, sortOrder: 3, isActive: true },
+  // ── OX 퀴즈관 ──
+  { id: 1004, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'ox_quiz',           label: 'OX 생존퀴즈관', zoneType: 'blocked', originX: 20, originY: 2,  widthTiles: 8,  heightTiles: 7, sortOrder: 4, isActive: true },
+  // ── 아바타관 ──
+  { id: 1005, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'avatar_hall',       label: '아바타관',      zoneType: 'blocked', originX: 0,  originY: 14, widthTiles: 8,  heightTiles: 8, sortOrder: 5, isActive: true },
+  // ── 미션센터 ──
+  { id: 1006, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'mission_center',    label: '미션센터',      zoneType: 'blocked', originX: 20, originY: 14, widthTiles: 8,  heightTiles: 8, sortOrder: 6, isActive: true },
+  // ── 랭킹 타워 ──
+  { id: 1007, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'ranking_tower',     label: '랭킹 타워',     zoneType: 'blocked', originX: 24, originY: 8,  widthTiles: 4,  heightTiles: 6, sortOrder: 7, isActive: true },
+  // ── 정문 기둥 ──
+  { id: 1008, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'gate_left_pillar',  label: '정문 기둥',     zoneType: 'blocked', originX: 10, originY: 25, widthTiles: 2,  heightTiles: 3, sortOrder: 8, isActive: true },
+  { id: 1009, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'gate_right_pillar', label: '정문 기둥',     zoneType: 'blocked', originX: 16, originY: 25, widthTiles: 2,  heightTiles: 3, sortOrder: 9, isActive: true },
+  // ── 나무 (코너) ──
+  { id: 1010, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'trees_topleft',     label: '나무',          zoneType: 'blocked', originX: 0,  originY: 0,  widthTiles: 3,  heightTiles: 3, sortOrder: 10, isActive: true },
+  { id: 1011, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'trees_topright',    label: '나무',          zoneType: 'blocked', originX: 25, originY: 0,  widthTiles: 3,  heightTiles: 3, sortOrder: 11, isActive: true },
+  { id: 1012, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'trees_bottomleft',  label: '나무',          zoneType: 'blocked', originX: 0,  originY: 24, widthTiles: 3,  heightTiles: 4, sortOrder: 12, isActive: true },
+  { id: 1013, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'trees_bottomright', label: '나무',          zoneType: 'blocked', originX: 25, originY: 24, widthTiles: 3,  heightTiles: 4, sortOrder: 13, isActive: true },
 ];
 
 // ─── PORTAL / DOOR POSITIONS ─────────────────────────────────────────────────

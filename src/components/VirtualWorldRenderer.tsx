@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { VirtualCampusAdminSnapshot, VirtualCampusAvatarDirection } from '../types/virtual-campus';
+import type { VirtualCampusAdminSnapshot, VirtualCampusAvatarDirection, VirtualCampusPortalSummary } from '../types/virtual-campus';
 import MapLayer from './VirtualWorld/MapLayer';
 import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
@@ -43,17 +43,25 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     if (isSquare) {
       // Merge server portals with our analyzed ones (server wins for same key)
       const serverKeys = new Set(data.roomView.portals.map(p => p.sourcePortalKey));
-      const clientPortals = campusSquarePortals
+      const clientPortals: VirtualCampusPortalSummary[] = campusSquarePortals
         .filter(p => !serverKeys.has(p.id))
-        .map(p => ({
-          id: p.id,
+        .map((p, index) => ({
+          id: 10000 + index,
+          sourceMapCode: currentMap.mapCode,
+          targetMapCode: p.targetMapCode,
           sourcePortalKey: p.id,
+          targetPortalKey: 'entry',
+          label: p.label,
+          transitionLabel: `이동: ${p.label}`,
           sourceX: p.x,
           sourceY: p.y,
-          targetMapCode: p.targetMapCode,
+          sourceWidthTiles: 1,
+          sourceHeightTiles: 1,
           targetX: 1,
           targetY: 1,
-          label: p.label,
+          targetFacingDirection: 'down' as VirtualCampusAvatarDirection,
+          sortOrder: index,
+          isActive: true,
         }));
       return [...data.roomView.portals, ...clientPortals];
     }
