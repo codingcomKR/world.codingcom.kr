@@ -1,4 +1,3 @@
-
 interface MapLayerProps {
   children: React.ReactNode;
   playerX?: number;
@@ -6,8 +5,7 @@ interface MapLayerProps {
 }
 
 export default function MapLayer({ children, playerX = 0, playerY = 0 }: MapLayerProps) {
-  
-  // Standard 2:1 Isometric Constants for the logic
+  // Standard 2:1 Isometric Constants
   const TILE_WIDTH = 128;
   const TILE_HEIGHT = 64;
   const HALF_WIDTH = TILE_WIDTH / 2;
@@ -16,8 +14,13 @@ export default function MapLayer({ children, playerX = 0, playerY = 0 }: MapLaye
   // USER'S MAP IMAGE
   const MAP_IMAGE_URL = '/assets/map_bg.png';
 
-  // 1. Coordinate calculation for the camera
-  // This keeps the player at the center of the screen
+  // --- IMAGE OFFSET TUNING ---
+  // If your character is not on the path, adjust these numbers!
+  const IMAGE_OFFSET_X = 0; 
+  const IMAGE_OFFSET_Y = 0; 
+  // ---------------------------
+
+  // 1. Camera calculation (Player is the center of the screen)
   const playerScreenX = (playerX - playerY) * HALF_WIDTH;
   const playerScreenY = (playerX + playerY) * HALF_HEIGHT;
   const cx = -playerScreenX;
@@ -25,10 +28,6 @@ export default function MapLayer({ children, playerX = 0, playerY = 0 }: MapLaye
 
   return (
     <div className="view-3d-container fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden">
-      {/* 
-          THE RPG PLANE
-          Everything here moves relative to the player (camera).
-      */}
       <div
         className="relative transition-transform duration-700 ease-out"
         id="rpg-camera-plane"
@@ -42,26 +41,26 @@ export default function MapLayer({ children, playerX = 0, playerY = 0 }: MapLaye
         }}
       >
         {/* 
-            THE ORIGINAL BACKGROUND IMAGE
-            Centered on (0,0). We use an <img> tag to preserve original size/ratio.
+            THE MAP IMAGE
+            We use -50% -50% to center it on (0,0).
+            Use IMAGE_OFFSET to move it if the artwork's (0,0) isn't the image center.
         */}
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2">
+        <div 
+          className="absolute"
+          style={{
+            transform: `translate(calc(-50% + ${IMAGE_OFFSET_X}px), calc(${IMAGE_OFFSET_Y}px))`,
+            top: '0px',
+            left: '0px'
+          }}
+        >
            <img 
               src={MAP_IMAGE_URL} 
               alt="Map Background" 
               className="max-w-none block shadow-[0_0_100px_rgba(0,0,0,1)]"
-              onLoad={(e) => {
-                // Potential debug: Log natural size
-                const img = e.currentTarget;
-                console.log(`[DEBUG] Map Image Loaded: ${img.naturalWidth}x${img.naturalHeight}`);
-              }}
            />
         </div>
 
-        {/* 
-            INTERACTIVE LAYER (Avatars, NPCs, etc.)
-            Positions are relative to the (0,0) center point.
-        */}
+        {/* INTERACTIVE LAYER */}
         <div className="relative z-10">
           {children}
         </div>
