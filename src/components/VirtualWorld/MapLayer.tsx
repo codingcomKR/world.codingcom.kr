@@ -10,7 +10,9 @@ interface MapLayerProps {
 export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles, mapCode } = currentMap;
   
-  const isOutdoor = mapCode.toLowerCase().includes('square') || mapCode.toLowerCase().includes('plaza');
+  // Robust detection for square/plaza
+  const normCode = (mapCode || '').toLowerCase();
+  const isOutdoor = normCode.includes('square') || normCode.includes('plaza') || normCode.includes('hub');
 
   // Standard 2:1 Isometric Constants
   const TILE_WIDTH = 128;
@@ -38,21 +40,15 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
   const floorHeight = maxY - minY;
 
   return (
-    <div className="view-3d-container relative flex items-center justify-center bg-[#020617] overflow-hidden">
+    <div className="view-3d-container fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden">
       
-      {/* 1. CYBER DISTANT HORIZON */}
-      {isOutdoor && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-cyan-500/50 shadow-[0_0_20px_cyan]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#0f172a_0%,#020617_100%)]" />
-          {/* Distant Silhouettes */}
-          <div className="absolute bottom-1/2 left-0 right-0 h-40 flex items-end justify-around px-20">
-             {[...Array(6)].map((_, i) => (
-               <div key={i} className="w-32 bg-slate-900/40 border-t border-cyan-500/10 h-20 rounded-t-lg" style={{ height: `${30 + Math.random() * 50}px` }} />
-             ))}
-          </div>
-        </div>
-      )}
+      {/* 1. ATMOSPHERIC BACKGROUND (Always visible) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#0f172a_0%,#020617_100%)]" />
+        {isOutdoor && (
+          <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-cyan-500/20 blur-[1px]" />
+        )}
+      </div>
 
       {/* Isometric Camera Plane */}
       <div
@@ -67,19 +63,18 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           transformStyle: 'preserve-3d'
         }}
       >
-        {/* THE FLOOR (High-End CSS Pattern) */}
+        {/* THE FLOOR (Diamond Shape) */}
         <div 
-          className={`absolute ${isOutdoor ? 'shadow-[0_0_200px_rgba(0,0,0,0.8)]' : 'shadow-[0_120px_250px_rgba(0,0,0,1)]'}`}
+          className="absolute shadow-[0_50px_200px_rgba(0,0,0,0.8)]"
           style={{
             width: `${floorWidth}px`,
             height: `${floorHeight}px`,
             left: `${minX}px`,
             top: `${minY}px`,
-            backgroundColor: '#0a0f1d',
+            backgroundColor: isOutdoor ? '#0a0f1d' : '#111827',
             backgroundImage: `
-              radial-gradient(circle at 50% 50%, #1e293b 0%, #0a0f1d 80%),
-              repeating-linear-gradient(45deg, rgba(34,211,238,0.03) 0, rgba(34,211,238,0.03) 1px, transparent 1px, transparent 40px),
-              repeating-linear-gradient(-45deg, rgba(34,211,238,0.03) 0, rgba(34,211,238,0.03) 1px, transparent 1px, transparent 40px)
+              repeating-linear-gradient(45deg, rgba(34,211,238,0.05) 0, rgba(34,211,238,0.05) 1px, transparent 1px, transparent 40px),
+              repeating-linear-gradient(-45deg, rgba(34,211,238,0.05) 0, rgba(34,211,238,0.05) 1px, transparent 1px, transparent 40px)
             `,
             clipPath: `polygon(
               ${((topV.x - minX) / floorWidth) * 100}% ${((topV.y - minY) / floorHeight) * 100}%,
@@ -99,31 +94,23 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
                  backgroundSize: `${TILE_WIDTH}px ${TILE_HEIGHT}px`,
                  backgroundPosition: `${-minX}px ${-minY}px`
                }} />
-          
-          {/* Central Decoration for Squares */}
-          {isOutdoor && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-40">
-               <div className="w-[500px] h-[500px] border border-cyan-500/20 rounded-full" />
-               <div className="absolute w-[700px] h-[700px] border border-cyan-500/10 rounded-full" />
-            </div>
-          )}
         </div>
 
-        {/* --- INTERIOR WALLS (Always show if not outdoor, or if explicitly lobby) --- */}
+        {/* --- REAR WALLS (Building Interior Effect) --- */}
         {!isOutdoor && (
           <>
             <div className="absolute bg-[#1e293b] border-l-4 border-slate-700/50"
                  style={{
-                   width: `${widthTiles * HALF_WIDTH}px`, height: '360px',
+                   width: `${widthTiles * HALF_WIDTH}px`, height: '400px',
                    left: '0', top: '0', transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                  }}>
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#0f172a] shadow-inner" />
-              <div className="absolute top-20 left-20 text-cyan-400/20 font-black text-6xl tracking-tighter select-none">CODINGCOM LOBBY</div>
+              <div className="absolute top-1/2 left-20 -translate-y-1/2 text-cyan-500/10 font-black text-8xl tracking-tighter select-none rotate-[-26.5deg]">LOBBY</div>
             </div>
             <div className="absolute bg-[#1e293b] border-r-4 border-slate-700/50"
                  style={{
-                   width: `${heightTiles * HALF_WIDTH}px`, height: '360px',
+                   width: `${heightTiles * HALF_WIDTH}px`, height: '400px',
                    left: '0', top: '0', transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                  }}>
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
@@ -132,7 +119,7 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           </>
         )}
 
-        {/* --- CENTRAL SOL CORE --- */}
+        {/* --- CENTRAL SYMBOL (SOL CORE) --- */}
         {isOutdoor && (
           <div className="absolute z-20 pointer-events-none"
                style={{ left: '0px', top: '0px', transform: 'translate(-50%, -70%)' }}>
@@ -147,24 +134,24 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           </div>
         )}
 
-        {/* CONTENT */}
+        {/* SPRITES CONTENT */}
         <div className="relative z-10">
           {children}
         </div>
 
-        {/* FRONT BOUNDARIES (Lobby only) --- */}
+        {/* FRONT CURBS (Lobby only) */}
         {!isOutdoor && (
           <>
             <div className="absolute bg-[#0f172a] border-l border-slate-700/30"
                  style={{
-                   width: `${heightTiles * HALF_WIDTH}px`, height: '12px', 
+                   width: `${heightTiles * HALF_WIDTH}px`, height: '16px', 
                    left: `${rightV.x}px`, top: `${rightV.y}px`,
                    transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                    zIndex: 100
                  }} />
             <div className="absolute bg-[#0f172a] border-r border-slate-700/30"
                  style={{
-                   width: `${widthTiles * HALF_WIDTH}px`, height: '12px', 
+                   width: `${widthTiles * HALF_WIDTH}px`, height: '16px', 
                    left: `${leftV.x}px`, top: `${leftV.y}px`,
                    transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                    zIndex: 100
@@ -173,9 +160,6 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
         )}
 
       </div>
-
-      {/* Atmospheric FX */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_30%,rgba(2,6,23,0.5)_100%)]" />
     </div>
   );
 }

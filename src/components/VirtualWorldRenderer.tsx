@@ -66,7 +66,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     e.stopPropagation();
     const portal = portals.find(p => p.sourcePortalKey === portalKey);
     if (!portal || !myAvatar) return;
-    await moveAvatar('down', portal.targetX, portal.targetY, portal.targetMapCode, data.selectedMemberNo);
+    await moveAvatar('down', myAvatar.positionX, myAvatar.positionY, portal.targetMapCode, data.selectedMemberNo, portal.targetX, portal.targetY);
   };
 
   const findPath = (startX: number, startY: number, targetX: number, targetY: number) => {

@@ -12,7 +12,6 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync with initial data
   useEffect(() => {
     if (initialData) setData(initialData);
   }, [initialData]);
@@ -42,91 +41,81 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      
       const result = await res.json();
-      
-      if (!result.ok) {
-        setError(result.error || 'Action failed');
-      }
       return result;
     } catch (err: any) {
       console.error('Action error:', err);
-      setError(err.message);
       return { ok: false, error: err.message };
     } finally {
       setLoading(false);
     }
-  }, [refreshData]);
+  }, []);
 
   const moveAvatar = useCallback(async (
     direction: VirtualCampusAvatarDirection,
     currentX: number,
     currentY: number,
     mapCode: string,
-    memberNo: string
+    memberNo: string,
+    targetX?: number, // Optional: for teleports/portals
+    targetY?: number
   ) => {
-    // Close dialogue when moving
     setDialogue(null);
 
-    let nextX = currentX;
-    let nextY = currentY;
+    // If targetX/Y provided, use them (Teleport). Otherwise, step in direction.
+    let nextX = targetX !== undefined ? targetX : currentX;
+    let nextY = targetY !== undefined ? targetY : currentY;
 
-    switch (direction) {
-      case 'up': nextY--; break;
-      case 'down': nextY++; break;
-      case 'left': nextX--; break;
-      case 'right': nextX++; break;
+    if (targetX === undefined) {
+      switch (direction) {
+        case 'up': nextY--; break;
+        case 'down': nextY++; break;
+        case 'left': nextX--; break;
+        case 'right': nextX++; break;
+      }
     }
 
-    // Only perform optimistic update if we are moving within the SAME map
     const isMapTransition = data && mapCode !== data.roomView.mapCode;
 
+    // Optimistic Update (Only for same-map movement)
     if (!isMapTransition) {
       setData(prev => {
         if (!prev) return prev;
-        const isMyAvatar = (a: any) => a.memberNo === memberNo;
         const updatedAvatars = prev.roomView.avatars.map(avatar => 
-          isMyAvatar(avatar) 
+          avatar.memberNo === memberNo 
             ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
             : avatar
         );
-
-        // Safely update memberView only if avatar exists
-        const updatedMemberView = prev.memberView.avatar ? {
-          ...prev.memberView,
-          avatar: {
-            ...prev.memberView.avatar,
-            positionX: nextX,
-            positionY: nextY,
-            facingDirection: direction
-          }
-        } : prev.memberView;
-
         return {
           ...prev,
-          memberView: updatedMemberView,
-          roomView: { ...prev.roomView, avatars: updatedAvatars }
-        } as VirtualCampusAdminSnapshot;
+          roomView: { ...prev.roomView, avatars: updatedAvatars },
+          memberView: {
+            ...prev.memberView,
+            avatar: prev.memberView.avatar ? { ...prev.memberView.avatar, positionX: nextX, positionY: nextY, facingDirection: direction } : prev.memberView.avatar
+          }
+        };
       });
     }
 
     const result = await performAction({
       action: 'move_avatar',
       memberNo,
-      mapCode: mapCode,
+      mapCode,
       positionX: nextX,
       positionY: nextY,
       facingDirection: direction,
       scope: 'room'
     });
 
-    // If map changed, we MUST refresh the full state
-    if (result.ok && data && mapCode !== data.roomView.mapCode) {
+    if (result.ok && result.roomView) {
       setData(result);
+    } else if (isMapTransition) {
+      // If we jumped map, we need to refresh to get the new room's state
+      await refreshData();
     }
 
     return result;
-  }, [data, performAction]);
+  }, [data, performAction, refreshData]);
 
   const talkToNpc = useCallback(async (npcCode: string, memberNo: string) => {
     const result = await performAction({
@@ -135,28 +124,14 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       npcCode,
       scope: 'room'
     });
-
     if (result.ok && result.dialogue) {
       setDialogue(result.dialogue);
-      // Dialogue might change quest status or stats, so refresh data
       setData(result);
-    } else if (result.ok && !result.dialogue) {
-      setError('이 NPC는 현재 할 말이 없는 것 같습니다.');
-      setDialogue(null);
     }
-    
     return result;
   }, [performAction]);
 
   return {
-    data,
-    dialogue,
-    loading,
-    error,
-    moveAvatar,
-    talkToNpc,
-    setDialogue,
-    performAction,
-    refreshData
+    data, dialogue, loading, error, moveAvatar, talkToNpc, setDialogue, performAction, refreshData
   };
 }
