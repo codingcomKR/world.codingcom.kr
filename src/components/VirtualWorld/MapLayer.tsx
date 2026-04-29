@@ -10,32 +10,27 @@ interface MapLayerProps {
 export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles } = currentMap;
   
-  // Standard 2:1 Isometric Constants for the coordinate system
+  // Standard 2:1 Isometric Constants for the logic
   const TILE_WIDTH = 128;
   const TILE_HEIGHT = 64;
   const HALF_WIDTH = TILE_WIDTH / 2;
   const HALF_HEIGHT = TILE_HEIGHT / 2;
 
-  // USER'S FULL MAP IMAGE
+  // USER'S MAP IMAGE
   const MAP_IMAGE_URL = '/assets/map_bg.png';
 
-  // 1. Calculate Camera Position (Centers on player)
+  // 1. Coordinate calculation for the camera
+  // This keeps the player at the center of the screen
   const playerScreenX = (playerX - playerY) * HALF_WIDTH;
   const playerScreenY = (playerX + playerY) * HALF_HEIGHT;
   const cx = -playerScreenX;
   const cy = -playerScreenY;
 
-  // 2. Full Image Dimensions (Estimated or Fixed)
-  // To prevent clipping, we use a large enough area or ideally the actual image size.
-  // For 30x30 tiles, the bounding box is (30+30)*64 = 3840 wide.
-  const totalMapWidth = (widthTiles + heightTiles) * HALF_WIDTH;
-  const totalMapHeight = (widthTiles + heightTiles) * HALF_HEIGHT;
-
   return (
     <div className="view-3d-container fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden">
       {/* 
-          RPG CAMERA PLANE
-          The coordinate (0,0) is at the center of this plane conceptually.
+          THE RPG PLANE
+          Everything here moves relative to the player (camera).
       */}
       <div
         className="relative transition-transform duration-700 ease-out"
@@ -50,27 +45,25 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
         }}
       >
         {/* 
-            THE BACKGROUND IMAGE
-            We place it relative to the (0,0) point. 
-            In 2:1 iso, (0,0) is the top vertex of the diamond.
+            THE ORIGINAL BACKGROUND IMAGE
+            Centered on (0,0). We use an <img> tag to preserve original size/ratio.
         */}
-        <div 
-          className="absolute"
-          style={{
-            width: `${totalMapWidth}px`,
-            height: `${totalMapHeight}px`,
-            left: `${-heightTiles * HALF_WIDTH}px`, // Offset to align top-center of diamond to (0,0)
-            top: '0px',
-            backgroundImage: `url("${MAP_IMAGE_URL}")`,
-            backgroundSize: '100% 100%',
-            backgroundRepeat: 'no-repeat',
-            // NO CLIP-PATH: Let the full image shine
-          }}
-        />
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2">
+           <img 
+              src={MAP_IMAGE_URL} 
+              alt="Map Background" 
+              className="max-w-none block shadow-[0_0_100px_rgba(0,0,0,1)]"
+              onLoad={(e) => {
+                // Potential debug: Log natural size
+                const img = e.currentTarget;
+                console.log(`[DEBUG] Map Image Loaded: ${img.naturalWidth}x${img.naturalHeight}`);
+              }}
+           />
+        </div>
 
         {/* 
-            TRANSPARENT GRID LAYER
-            This is where avatars and NPCs live.
+            INTERACTIVE LAYER (Avatars, NPCs, etc.)
+            Positions are relative to the (0,0) center point.
         */}
         <div className="relative z-10">
           {children}
