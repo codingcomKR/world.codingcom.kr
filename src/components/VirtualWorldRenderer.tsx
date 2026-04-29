@@ -23,10 +23,8 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   const myAvatar = data.memberView.avatar;
   const isSquare = mapCode.toLowerCase().includes('square') || mapCode.toLowerCase().includes('plaza');
 
-  // Asset Paths (Generated)
-  const CODINGDONG_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/codingdong_building_iso_1777418377582.png';
-  const OX_QUIZ_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/ox_quiz_hall_iso_1777418747156.png';
-  const RANKING_TOWER_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/ranking_tower_iso_retry_1777419375425.png';
+  // Log map code for debugging
+  console.log('[DEBUG] Current Map Code:', mapCode);
 
   // Keyboard controls
   useEffect(() => {
@@ -117,12 +115,12 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         <MapLayer currentMap={currentMap} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
           <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
           
-          {/* BUILDINGS (Only in Square) */}
+          {/* BUILDINGS / OBJECTS (Styled Placeholders for Reliability) */}
           {isSquare && (
             <>
-              <WorldObject x={-4} y={-4} imageUrl={CODINGDONG_URL} width={450} height={450} label="코딩동 (CLASSROOM)" />
-              <WorldObject x={8} y={-6} imageUrl={OX_QUIZ_URL} width={500} height={500} label="OX 서바이벌 퀴즈관" />
-              <WorldObject x={-8} y={6} imageUrl={RANKING_TOWER_URL} width={400} height={600} label="랭킹 타워" />
+              <WorldObject x={-4} y={-4} imageUrl="" width={300} height={400} label="코딩동 (CODINGDONG)" />
+              <WorldObject x={8} y={-6} imageUrl="" width={400} height={300} label="OX 퀴즈관" />
+              <WorldObject x={-8} y={6} imageUrl="" width={150} height={500} label="랭킹 타워" />
             </>
           )}
 
@@ -136,12 +134,11 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         </MapLayer>
       </div>
 
-      {/* Floating HUD */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
           <div className="bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl">
             <div className="text-cyan-400 font-black text-xl tracking-tight leading-none">{currentMap.title}</div>
-            <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode}</div>
+            <div className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{currentMap.mapCode} ({mapCode})</div>
           </div>
         </div>
         
