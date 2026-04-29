@@ -5,6 +5,7 @@ import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
 import CollisionLayer from './VirtualWorld/CollisionLayer';
+import WorldObject from './VirtualWorld/WorldObject';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
 import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
@@ -18,15 +19,20 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   if (!data || !data.roomView || !data.roomView.currentMap) return null;
 
   const { currentMap, avatars, portals, collisionZones, npcs } = data.roomView;
-  const { widthTiles, heightTiles } = currentMap;
+  const { widthTiles, heightTiles, mapCode } = currentMap;
   const myAvatar = data.memberView.avatar;
+  const isSquare = mapCode.toLowerCase().includes('square') || mapCode.toLowerCase().includes('plaza');
+
+  // Asset Paths (Generated)
+  const CODINGDONG_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/codingdong_building_iso_1777418377582.png';
+  const OX_QUIZ_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/ox_quiz_hall_iso_1777418747156.png';
+  const RANKING_TOWER_URL = 'file:///Users/bagjongdeog/.gemini/antigravity/brain/5cdee275-45ff-4904-a1fb-2cccb372966f/ranking_tower_iso_retry_1777419375425.png';
 
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === 'INPUT' || dialogue) return;
-      const keys = ['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-      if (keys.includes(e.key.toLowerCase())) { e.preventDefault(); }
+      if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) { e.preventDefault(); }
       switch (e.key.toLowerCase()) {
         case 'w': case 'arrowup': handleMove('up'); break;
         case 's': case 'arrowdown': handleMove('down'); break;
@@ -47,10 +53,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     if (direction === 'left') nextX--;
     if (direction === 'right') nextX++;
     if (nextX < 0 || nextX >= widthTiles || nextY < 0 || nextY >= heightTiles) return;
-    const isBlocked = collisionZones.some(zone => 
-      nextX >= zone.originX && nextX < zone.originX + zone.widthTiles &&
-      nextY >= zone.originY && nextY < zone.originY + zone.heightTiles
-    );
+    const isBlocked = collisionZones.some(zone => nextX >= zone.originX && nextX < zone.originX + zone.widthTiles && nextY >= zone.originY && nextY < zone.originY + zone.heightTiles);
     if (isBlocked) return;
     await moveAvatar(direction, myAvatar.positionX, myAvatar.positionY, currentMap.mapCode, data.selectedMemberNo);
   };
@@ -68,35 +71,22 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     await moveAvatar('down', portal.targetX, portal.targetY, portal.targetMapCode, data.selectedMemberNo);
   };
 
-  const selectedNpc = npcs.find(n => n.npcCode === selectedNpcCode);
-
   const findPath = (startX: number, startY: number, targetX: number, targetY: number) => {
-    const queue: { x: number, y: number, path: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] }[] = [
-      { x: startX, y: startY, path: [] }
-    ];
+    const queue: { x: number, y: number, path: { x: number, y: number, dir: VirtualCampusAvatarDirection }[] }[] = [{ x: startX, y: startY, path: [] }];
     const visited = new Set<string>();
     visited.add(`${startX},${startY}`);
     while (queue.length > 0) {
       const { x, y, path } = queue.shift()!;
       if (x === targetX && y === targetY) return path;
-      const neighbors = [
-        { x: x, y: y - 1, dir: 'up' as const },
-        { x: x, y: y + 1, dir: 'down' as const },
-        { x: x - 1, y: y, dir: 'left' as const },
-        { x: x + 1, y: y, dir: 'right' as const },
-      ];
+      const neighbors = [{ x, y: y - 1, dir: 'up' as const }, { x, y: y + 1, dir: 'down' as const }, { x: x - 1, y, dir: 'left' as const }, { x: x + 1, y, dir: 'right' as const }];
       for (const next of neighbors) {
         const key = `${next.x},${next.y}`;
-        if (
-          next.x >= 0 && next.x < widthTiles && next.y >= 0 && next.y < heightTiles && 
-          !visited.has(key) &&
-          !collisionZones.some(z => next.x >= z.originX && next.x < z.originX + z.widthTiles && next.y >= z.originY && next.y < z.originY + z.heightTiles)
-        ) {
+        if (next.x >= 0 && next.x < widthTiles && next.y >= 0 && next.y < heightTiles && !visited.has(key) && !collisionZones.some(z => next.x >= z.originX && next.x < z.originX + z.widthTiles && next.y >= z.originY && next.y < z.originY + z.heightTiles)) {
           visited.add(key);
           queue.push({ x: next.x, y: next.y, path: [...path, next] });
         }
       }
-      if (queue.length > 1000) break;
+      if (queue.length > 800) break;
     }
     return null;
   };
@@ -104,23 +94,16 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
     if (!myAvatar || dialogue) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const sx = e.clientX - (rect.left + rect.width / 2);
-    const sy = e.clientY - (rect.top + rect.height / 2);
-
+    const sx = (e.clientX - (rect.left + rect.width / 2));
+    const sy = (e.clientY - (rect.top + rect.height / 2));
     const cameraPlane = document.getElementById('rpg-camera-plane');
     const cx = Number(cameraPlane?.getAttribute('data-cx') || 0);
     const cy = Number(cameraPlane?.getAttribute('data-cy') || 0);
-
-    const screenX = sx - cx;
-    const screenY = sy - cy;
-
-    const targetX = Math.round((screenX / 64 + screenY / 32) / 2);
-    const targetY = Math.round((screenY / 32 - screenX / 64) / 2);
-
+    const targetX = Math.round(((sx - cx) / 64 + (sy - cy) / 32) / 2);
+    const targetY = Math.round(((sy - cy) / 32 - (sx - cx) / 64) / 2);
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
-
     const foundPath = findPath(Math.floor(myAvatar.positionX), Math.floor(myAvatar.positionY), targetX, targetY);
-    if (foundPath && foundPath.length > 0) {
+    if (foundPath) {
       for (const step of foundPath) {
         moveAvatar(step.dir, step.x, step.y, currentMap.mapCode, data.selectedMemberNo);
         await new Promise(r => setTimeout(r, 120));
@@ -133,6 +116,16 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
       <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
         <MapLayer currentMap={currentMap} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
           <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
+          
+          {/* BUILDINGS (Only in Square) */}
+          {isSquare && (
+            <>
+              <WorldObject x={-4} y={-4} imageUrl={CODINGDONG_URL} width={450} height={450} label="코딩동 (CLASSROOM)" />
+              <WorldObject x={8} y={-6} imageUrl={OX_QUIZ_URL} width={500} height={500} label="OX 서바이벌 퀴즈관" />
+              <WorldObject x={-8} y={6} imageUrl={RANKING_TOWER_URL} width={400} height={600} label="랭킹 타워" />
+            </>
+          )}
+
           {portals.map(portal => (
             <PortalMarker key={portal.id} portal={portal} widthTiles={widthTiles} heightTiles={heightTiles} onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }} />
           ))}
@@ -143,6 +136,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         </MapLayer>
       </div>
 
+      {/* Floating HUD */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
           <div className="bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl">
@@ -157,9 +151,9 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
           <InventoryPanel data={data} />
         </div>
 
-        {selectedNpc && dialogue && (
+        {npcs.find(n => n.npcCode === selectedNpcCode) && dialogue && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/40 backdrop-blur-sm">
-            <DialoguePanel npc={selectedNpc} dialogue={dialogue} onClose={() => { setDialogue(null); setSelectedNpcCode(null); }} />
+            <DialoguePanel npc={npcs.find(n => n.npcCode === selectedNpcCode)!} dialogue={dialogue} onClose={() => { setDialogue(null); setSelectedNpcCode(null); }} />
           </div>
         )}
       </div>
