@@ -1,13 +1,12 @@
 import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
 
 interface MapLayerProps {
-  currentMap: VirtualCampusMapSummary;
   children: React.ReactNode;
   playerX?: number;
   playerY?: number;
 }
 
-export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
+export default function MapLayer({ children, playerX = 0, playerY = 0 }: MapLayerProps) {
   
   // Standard 2:1 Isometric Constants for the logic
   const TILE_WIDTH = 128;
