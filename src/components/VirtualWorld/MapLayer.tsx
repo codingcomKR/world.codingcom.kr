@@ -8,7 +8,6 @@ interface MapLayerProps {
 }
 
 export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
-  const { widthTiles, heightTiles } = currentMap;
   
   // Standard 2:1 Isometric Constants for the logic
   const TILE_WIDTH = 128;
