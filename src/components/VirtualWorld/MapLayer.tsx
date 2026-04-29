@@ -1,4 +1,3 @@
-import type { VirtualCampusMapSummary } from '../../types/virtual-campus';
 
 interface MapLayerProps {
   children: React.ReactNode;
