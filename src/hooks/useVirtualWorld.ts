@@ -17,37 +17,27 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
   }, [initialData]);
 
   const refreshData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
       const res = await fetch('/api/virtual-campus');
-      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-      const json = await res.json();
-      setData(json);
-    } catch (err: any) {
-      console.error('Data refresh error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      if (res.ok) {
+        const json = await res.json();
+        setData(json);
+      }
+    } catch (err) {
+      console.error('Refresh error:', err);
     }
   }, []);
 
   const performAction = useCallback(async (payload: VirtualCampusActionPayload) => {
-    setLoading(true);
-    setError(null);
     try {
       const res = await fetch('/api/virtual-campus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const result = await res.json();
-      return result;
+      return await res.json();
     } catch (err: any) {
-      console.error('Action error:', err);
       return { ok: false, error: err.message };
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -57,12 +47,11 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
     currentY: number,
     mapCode: string,
     memberNo: string,
-    targetX?: number, // Optional: for teleports/portals
+    targetX?: number,
     targetY?: number
   ) => {
     setDialogue(null);
 
-    // If targetX/Y provided, use them (Teleport). Otherwise, step in direction.
     let nextX = targetX !== undefined ? targetX : currentX;
     let nextY = targetY !== undefined ? targetY : currentY;
 
@@ -77,26 +66,25 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
 
     const isMapTransition = data && mapCode !== data.roomView.mapCode;
 
-    // Optimistic Update (Only for same-map movement)
-    if (!isMapTransition) {
-      setData(prev => {
-        if (!prev) return prev;
-        const updatedAvatars = prev.roomView.avatars.map(avatar => 
-          avatar.memberNo === memberNo 
-            ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
-            : avatar
-        );
-        return {
-          ...prev,
-          roomView: { ...prev.roomView, avatars: updatedAvatars },
-          memberView: {
-            ...prev.memberView,
-            avatar: prev.memberView.avatar ? { ...prev.memberView.avatar, positionX: nextX, positionY: nextY, facingDirection: direction } : prev.memberView.avatar
-          }
-        };
-      });
-    }
+    // 1. Optimistic Update (Immediate move)
+    setData(prev => {
+      if (!prev) return prev;
+      const updatedAvatars = prev.roomView.avatars.map(avatar => 
+        avatar.memberNo === memberNo 
+          ? { ...avatar, positionX: nextX, positionY: nextY, facingDirection: direction }
+          : avatar
+      );
+      return {
+        ...prev,
+        roomView: { ...prev.roomView, avatars: updatedAvatars },
+        memberView: {
+          ...prev.memberView,
+          avatar: prev.memberView.avatar ? { ...prev.memberView.avatar, positionX: nextX, positionY: nextY, facingDirection: direction } : prev.memberView.avatar
+        }
+      };
+    });
 
+    // 2. Perform Action
     const result = await performAction({
       action: 'move_avatar',
       memberNo,
@@ -107,11 +95,15 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       scope: 'room'
     });
 
-    if (result.ok && result.roomView) {
-      setData(result);
-    } else if (isMapTransition) {
-      // If we jumped map, we need to refresh to get the new room's state
-      await refreshData();
+    // 3. Handle Result (Only update full state if map changed or error occurred)
+    if (result.ok) {
+      if (isMapTransition || (result.roomView && result.roomView.mapCode !== mapCode)) {
+        setData(result);
+      }
+      // If same map, we ALREADY updated optimistically, so we DON'T update again to avoid jitter
+    } else {
+      // Revert if failed
+      refreshData();
     }
 
     return result;
