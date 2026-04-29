@@ -9,8 +9,6 @@ import type {
 export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) {
   const [data, setData] = useState<VirtualCampusAdminSnapshot | null>(initialData);
   const [dialogue, setDialogue] = useState<VirtualCampusNpcDialoguePayload | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) setData(initialData);
@@ -66,7 +64,7 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
 
     const isMapTransition = data && mapCode !== data.roomView.mapCode;
 
-    // 1. Optimistic Update (Immediate move)
+    // 1. Optimistic Update
     setData(prev => {
       if (!prev) return prev;
       const updatedAvatars = prev.roomView.avatars.map(avatar => 
@@ -95,14 +93,12 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
       scope: 'room'
     });
 
-    // 3. Handle Result (Only update full state if map changed or error occurred)
+    // 3. Handle Result
     if (result.ok) {
       if (isMapTransition || (result.roomView && result.roomView.mapCode !== mapCode)) {
         setData(result);
       }
-      // If same map, we ALREADY updated optimistically, so we DON'T update again to avoid jitter
     } else {
-      // Revert if failed
       refreshData();
     }
 
@@ -124,6 +120,6 @@ export function useVirtualWorld(initialData: VirtualCampusAdminSnapshot | null) 
   }, [performAction]);
 
   return {
-    data, dialogue, loading, error, moveAvatar, talkToNpc, setDialogue, performAction, refreshData
+    data, dialogue, moveAvatar, talkToNpc, setDialogue, performAction, refreshData
   };
 }
