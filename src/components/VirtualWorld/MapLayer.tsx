@@ -10,7 +10,6 @@ interface MapLayerProps {
 export default function MapLayer({ currentMap, children, playerX = 0, playerY = 0 }: MapLayerProps) {
   const { widthTiles, heightTiles, mapCode } = currentMap;
   
-  // Robust detection for square/plaza
   const normCode = (mapCode || '').toLowerCase();
   const isOutdoor = normCode.includes('square') || normCode.includes('plaza') || normCode.includes('hub');
 
@@ -19,6 +18,9 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
   const TILE_HEIGHT = 64;
   const HALF_WIDTH = TILE_WIDTH / 2;
   const HALF_HEIGHT = TILE_HEIGHT / 2;
+
+  // USER IMAGE PATH (Located in public/assets/)
+  const CUSTOM_MAP_IMAGE = '/assets/map_bg.png';
 
   // 1. Calculate Camera Position
   const playerScreenX = (playerX - playerY) * HALF_WIDTH;
@@ -42,12 +44,9 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
   return (
     <div className="view-3d-container fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden">
       
-      {/* 1. ATMOSPHERIC BACKGROUND (Always visible) */}
+      {/* ATMOSPHERIC BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#0f172a_0%,#020617_100%)]" />
-        {isOutdoor && (
-          <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-cyan-500/20 blur-[1px]" />
-        )}
       </div>
 
       {/* Isometric Camera Plane */}
@@ -63,19 +62,18 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
           transformStyle: 'preserve-3d'
         }}
       >
-        {/* THE FLOOR (Diamond Shape) */}
+        {/* THE FLOOR (Using Custom User Image) */}
         <div 
-          className="absolute shadow-[0_50px_200px_rgba(0,0,0,0.8)]"
+          className="absolute shadow-[0_50px_200px_rgba(0,0,0,0.8)] bg-[#111827]"
           style={{
             width: `${floorWidth}px`,
             height: `${floorHeight}px`,
             left: `${minX}px`,
             top: `${minY}px`,
-            backgroundColor: isOutdoor ? '#0a0f1d' : '#111827',
-            backgroundImage: `
-              repeating-linear-gradient(45deg, rgba(34,211,238,0.05) 0, rgba(34,211,238,0.05) 1px, transparent 1px, transparent 40px),
-              repeating-linear-gradient(-45deg, rgba(34,211,238,0.05) 0, rgba(34,211,238,0.05) 1px, transparent 1px, transparent 40px)
-            `,
+            backgroundImage: `url("${CUSTOM_MAP_IMAGE}"), 
+              repeating-linear-gradient(45deg, rgba(34,211,238,0.05) 0, rgba(34,211,238,0.05) 1px, transparent 1px, transparent 40px)`,
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
             clipPath: `polygon(
               ${((topV.x - minX) / floorWidth) * 100}% ${((topV.y - minY) / floorHeight) * 100}%,
               ${((rightV.x - minX) / floorWidth) * 100}% ${((rightV.y - minY) / floorHeight) * 100}%,
@@ -84,7 +82,7 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
             )`
           }}
         >
-          {/* Subtle Grid overlay */}
+          {/* Subtle Grid overlay (Only visible if map_bg.png is missing or transparent) */}
           <div className="absolute inset-0 opacity-[0.1] pointer-events-none"
                style={{
                  backgroundImage: `
@@ -96,7 +94,7 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
                }} />
         </div>
 
-        {/* --- REAR WALLS (Building Interior Effect) --- */}
+        {/* REAR WALLS (Lobby Style) */}
         {!isOutdoor && (
           <>
             <div className="absolute bg-[#1e293b] border-l-4 border-slate-700/50"
@@ -104,42 +102,24 @@ export default function MapLayer({ currentMap, children, playerX = 0, playerY = 
                    width: `${widthTiles * HALF_WIDTH}px`, height: '400px',
                    left: '0', top: '0', transform: 'skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                  }}>
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#0f172a] shadow-inner" />
-              <div className="absolute top-1/2 left-20 -translate-y-1/2 text-cyan-500/10 font-black text-8xl tracking-tighter select-none rotate-[-26.5deg]">LOBBY</div>
             </div>
             <div className="absolute bg-[#1e293b] border-r-4 border-slate-700/50"
                  style={{
                    width: `${heightTiles * HALF_WIDTH}px`, height: '400px',
                    left: '0', top: '0', transform: 'scaleX(-1) skewY(26.5deg) translateY(-100%)', transformOrigin: 'bottom left',
                  }}>
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)', backgroundSize: '40px 100%' }} />
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#0f172a] shadow-inner" />
             </div>
           </>
         )}
 
-        {/* --- CENTRAL SYMBOL (SOL CORE) --- */}
-        {isOutdoor && (
-          <div className="absolute z-20 pointer-events-none"
-               style={{ left: '0px', top: '0px', transform: 'translate(-50%, -70%)' }}>
-            <div className="w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-32 h-32 flex items-center justify-center">
-                <div className="absolute inset-0 bg-white rounded-full shadow-[0_0_80px_cyan] animate-pulse" />
-                <div className="absolute w-48 h-48 border-4 border-cyan-400/40 rounded-full animate-[spin_4s_linear_infinite] scale-y-[0.3] rotate-[30deg]" />
-                <div className="absolute w-56 h-56 border-2 border-dashed border-cyan-500/30 rounded-full animate-[spin_6s_linear_infinite_reverse] scale-y-[0.3] -rotate-[30deg]" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SPRITES CONTENT */}
+        {/* CONTENT (Avatars, Portals, etc.) */}
         <div className="relative z-10">
           {children}
         </div>
 
-        {/* FRONT CURBS (Lobby only) */}
+        {/* FRONT CURBS (Lobby Style) */}
         {!isOutdoor && (
           <>
             <div className="absolute bg-[#0f172a] border-l border-slate-700/30"
