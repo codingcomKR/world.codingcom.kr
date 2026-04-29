@@ -6,14 +6,14 @@ export const CAMPUS_SQUARE_MAP_CODE = 'CAMPUS_SQUARE';
 
 export const campusSquareCollisionZones: VirtualCampusCollisionZoneSummary[] = [
   // ── CENTRAL FOUNTAIN (Shrunk to allow walking around it freely) ──
-  { id: 1001, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'fountain',          label: '중앙 분수대',    zoneType: 'blocked', originX: 11, originY: 9, widthTiles: 6, heightTiles: 6, sortOrder: 1, isActive: true },
+  { id: 1001, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'fountain',          label: '중앙 분수대',    zoneType: 'blocked', originX: 12, originY: 11, widthTiles: 4, heightTiles: 3, sortOrder: 1, isActive: true },
   
   // ── 건물의 블록 영역 축소 (길을 더 넓게 쓰도록 위로/옆으로 바짝 붙임) ──
   { id: 1002, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'codingdong',        label: '코딩동',        zoneType: 'blocked', originX: 10,  originY: 0,  widthTiles: 8, heightTiles: 5, sortOrder: 2, isActive: true },
   { id: 1003, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'shop',              label: '상점',          zoneType: 'blocked', originX: 0,  originY: 0,  widthTiles: 7,  heightTiles: 6, sortOrder: 3, isActive: true },
   { id: 1004, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'ox_quiz',           label: 'OX 생존퀴즈관', zoneType: 'blocked', originX: 21, originY: 0,  widthTiles: 7,  heightTiles: 6, sortOrder: 4, isActive: true },
   { id: 1005, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'avatar_hall',       label: '아바타관',      zoneType: 'blocked', originX: 0,  originY: 15, widthTiles: 7,  heightTiles: 7, sortOrder: 5, isActive: true },
-  { id: 1006, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'mission_center',    label: '미션센터',      zoneType: 'blocked', originX: 21, originY: 15, widthTiles: 7,  heightTiles: 7, sortOrder: 6, isActive: true },
+  { id: 1006, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'mission_center',    label: '미션센터',      zoneType: 'blocked', originX: 20, originY: 13, widthTiles: 6,  heightTiles: 6, sortOrder: 6, isActive: true },
   { id: 1007, mapCode: CAMPUS_SQUARE_MAP_CODE, zoneKey: 'ranking_tower',     label: '랭킹 타워',     zoneType: 'blocked', originX: 25, originY: 8,  widthTiles: 3,  heightTiles: 6, sortOrder: 7, isActive: true },
   
   // ── 정문 기둥 ──
