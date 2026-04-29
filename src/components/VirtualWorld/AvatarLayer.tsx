@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { VirtualCampusAvatarSummary } from '../../types/virtual-campus';
 import AvatarMarker from './AvatarMarker';
+import { MAP_IMAGE_W, MAP_IMAGE_H } from '../../config/mapConfig';
 
 interface AvatarLayerProps {
   avatars: VirtualCampusAvatarSummary[];
@@ -9,7 +10,9 @@ interface AvatarLayerProps {
   heightTiles: number;
 }
 
-export default function AvatarLayer({ avatars, selectedMemberNo }: AvatarLayerProps) {
+export default function AvatarLayer({ avatars, selectedMemberNo, widthTiles, heightTiles }: AvatarLayerProps) {
+  const tileW = MAP_IMAGE_W / widthTiles;
+  const tileH = MAP_IMAGE_H / heightTiles;
   const prevPositions = useRef<Record<string, { x: number, y: number }>>({});
   const [movingAvatars, setMovingAvatars] = useState<Record<string, boolean>>({});
 
@@ -40,7 +43,9 @@ export default function AvatarLayer({ avatars, selectedMemberNo }: AvatarLayerPr
             avatar={avatar} 
             selected={isMe} 
             moving={isMoving}
-            size={isMe ? 'lg' : 'md'} 
+            size={isMe ? 'lg' : 'md'}
+            tileW={tileW}
+            tileH={tileH}
           />
         );
       })}

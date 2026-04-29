@@ -1,4 +1,5 @@
 import type { VirtualCampusNpcSummary } from '../../types/virtual-campus';
+import { MAP_IMAGE_W, MAP_IMAGE_H } from '../../config/mapConfig';
 
 interface NpcMarkerProps {
   npc: VirtualCampusNpcSummary;
@@ -15,20 +16,24 @@ export default function NpcMarker({
   isSelected,
   canTalk,
   previewText,
-  onClick
+  onClick,
+  widthTiles,
+  heightTiles,
 }: NpcMarkerProps) {
+  const tileW = MAP_IMAGE_W / widthTiles;
+  const tileH = MAP_IMAGE_H / heightTiles;
   const showSpeechBubble = isSelected || canTalk;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="absolute z-20 group billboard-rpg transition-all duration-300"
+      className="absolute z-20 group transition-all duration-300"
       style={{
-        // 2:1 Isometric Projection
-        left: `${(npc.positionX - npc.positionY) * 64}px`,
-        top: `${(npc.positionX + npc.positionY) * 32}px`,
-        transform: 'translate(-50%, -100%)', // Anchor to feet
+        // 2D flat grid: center-bottom of tile
+        left: `${npc.positionX * tileW + tileW / 2}px`,
+        top: `${(npc.positionY + 1) * tileH}px`,
+        transform: 'translate(-50%, -100%)',
       }}
     >
       {showSpeechBubble && (

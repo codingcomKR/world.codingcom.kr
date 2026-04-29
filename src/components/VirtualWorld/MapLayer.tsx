@@ -1,63 +1,30 @@
+import { MAP_IMAGE_URL, MAP_IMAGE_W, MAP_IMAGE_H } from '../../config/mapConfig';
+
 interface MapLayerProps {
+  widthTiles: number;
+  heightTiles: number;
   children: React.ReactNode;
   playerX?: number;
   playerY?: number;
   debugGrid?: boolean;
 }
 
-export default function MapLayer({ children, playerX = 0, playerY = 0, debugGrid = true }: MapLayerProps) {
-  // --- CONFIGURATION ---
-  // Tile size in pixels. Adjust to match the image's actual tile size.
-  const TILE_WIDTH = 128;
-  const TILE_HEIGHT = 64;
-  const HALF_WIDTH = TILE_WIDTH / 2;
-  const HALF_HEIGHT = TILE_HEIGHT / 2;
+export default function MapLayer({
+  widthTiles,
+  heightTiles,
+  children,
+  playerX = 0,
+  playerY = 0,
+  debugGrid = false,
+}: MapLayerProps) {
+  // 2D Tile size derived from image dimensions
+  const tileW = MAP_IMAGE_W / widthTiles;
+  const tileH = MAP_IMAGE_H / heightTiles;
 
-  const MAP_COLS = 28;
-  const MAP_ROWS = 28;
-
-  const MAP_IMAGE_URL = '/assets/map_bg.png';
-
-  // Total image size
-  const TOTAL_WIDTH = MAP_COLS * TILE_WIDTH; // 3584px
-  const TOTAL_HEIGHT = MAP_ROWS * TILE_HEIGHT; // 1792px
-
-  // Vertical offset for the image origin.
-  // Increase this if the grid appears ABOVE the image tiles.
-  // Decrease if the grid appears BELOW the image tiles.
-  const IMAGE_SHIFT_Y = 0;
-
-  // 1. Camera: keep player centered
-  const playerScreenX = (playerX - playerY) * HALF_WIDTH;
-  const playerScreenY = (playerX + playerY) * HALF_HEIGHT;
-  const cx = -playerScreenX;
-  const cy = -playerScreenY;
-
-  // 2. Build debug grid tiles
-  const debugTiles = [];
-  if (debugGrid) {
-    for (let row = 0; row < MAP_ROWS; row++) {
-      for (let col = 0; col < MAP_COLS; col++) {
-        const sx = (col - row) * HALF_WIDTH;
-        const sy = (col + row) * HALF_HEIGHT;
-        const pts = [
-          `${sx},${sy - HALF_HEIGHT}`,           // top
-          `${sx + HALF_WIDTH},${sy}`,             // right
-          `${sx},${sy + HALF_HEIGHT}`,            // bottom
-          `${sx - HALF_WIDTH},${sy}`,             // left
-        ].join(' ');
-        debugTiles.push(
-          <polygon
-            key={`${row}-${col}`}
-            points={pts}
-            fill="none"
-            stroke="rgba(0,255,200,0.3)"
-            strokeWidth="1"
-          />
-        );
-      }
-    }
-  }
+  // Camera: keep player centered on screen
+  // Player sprite center = (playerX * tileW + tileW/2, playerY * tileH + tileH/2)
+  const cx = -(playerX * tileW + tileW / 2);
+  const cy = -(playerY * tileH + tileH / 2);
 
   return (
     <div className="view-3d-container fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden">
@@ -66,49 +33,62 @@ export default function MapLayer({ children, playerX = 0, playerY = 0, debugGrid
         id="rpg-camera-plane"
         data-cx={cx}
         data-cy={cy}
+        data-tile-w={tileW}
+        data-tile-h={tileH}
         style={{
           transform: `translate(${cx}px, ${cy}px)`,
           width: '0',
           height: '0',
-          transformStyle: 'preserve-3d'
         }}
       >
-        {/* BACKGROUND IMAGE */}
+        {/* BACKGROUND IMAGE — top-left is (0,0) origin */}
         <div
           className="absolute"
           style={{
-            width: `${TOTAL_WIDTH}px`,
-            height: `${TOTAL_HEIGHT}px`,
+            width: `${MAP_IMAGE_W}px`,
+            height: `${MAP_IMAGE_H}px`,
             left: '0px',
-            top: `${IMAGE_SHIFT_Y}px`,
-            transform: 'translateX(-50%)',
+            top: '0px',
           }}
         >
           <img
             src={MAP_IMAGE_URL}
             alt="Map Background"
-            className="w-full h-full block"
+            className="w-full h-full block shadow-[0_0_60px_rgba(0,0,0,1)]"
+            draggable={false}
           />
         </div>
 
-        {/* DEBUG GRID OVERLAY */}
+        {/* DEBUG GRID — shows tile boundaries */}
         {debugGrid && (
           <svg
             className="absolute pointer-events-none"
             style={{
-              left: `${-(MAP_COLS + MAP_ROWS) * HALF_WIDTH}px`,
-              top: `${IMAGE_SHIFT_Y}px`,
-              width: `${(MAP_COLS + MAP_ROWS) * TILE_WIDTH}px`,
-              height: `${(MAP_COLS + MAP_ROWS) * HALF_HEIGHT}px`,
-              overflow: 'visible',
+              left: 0,
+              top: 0,
+              width: `${MAP_IMAGE_W}px`,
+              height: `${MAP_IMAGE_H}px`,
               zIndex: 5,
             }}
           >
-            {debugTiles}
+            {Array.from({ length: heightTiles }).map((_, row) =>
+              Array.from({ length: widthTiles }).map((_, col) => (
+                <rect
+                  key={`${row}-${col}`}
+                  x={col * tileW}
+                  y={row * tileH}
+                  width={tileW}
+                  height={tileH}
+                  fill="none"
+                  stroke="rgba(0,255,200,0.25)"
+                  strokeWidth="1"
+                />
+              ))
+            )}
           </svg>
         )}
 
-        {/* INTERACTIVE LAYER */}
+        {/* INTERACTIVE LAYER (Avatars, NPCs, Portals) */}
         <div className="relative z-10">
           {children}
         </div>

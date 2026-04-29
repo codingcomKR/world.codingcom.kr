@@ -6,6 +6,8 @@ interface AvatarMarkerProps {
   moving?: boolean;
   downed?: boolean;
   size?: 'md' | 'lg';
+  tileW: number;
+  tileH: number;
 }
 
 export default function AvatarMarker({
@@ -14,22 +16,21 @@ export default function AvatarMarker({
   moving,
   downed,
   size = 'md',
+  tileW,
+  tileH,
 }: AvatarMarkerProps) {
   const isLg = size === 'lg';
   const sizeClass = isLg ? 'scale-125' : 'scale-100';
   
-  // Flip character horizontally based on direction
   const isFacingLeft = avatar.facingDirection === 'left';
 
   return (
     <div 
       className="absolute transition-all duration-300 ease-out z-20"
       style={{
-        // 2:1 Isometric Projection
-        // screenX = (x - y) * 64
-        // screenY = (x + y) * 32
-        left: `${(avatar.positionX - avatar.positionY) * 64}px`,
-        top: `${(avatar.positionX + avatar.positionY) * 32}px`,
+        // 2D flat grid: center-bottom of tile
+        left: `${avatar.positionX * tileW + tileW / 2}px`,
+        top: `${(avatar.positionY + 1) * tileH}px`,
         transform: 'translate(-50%, -100%)', // Anchor to feet
       }}
     >

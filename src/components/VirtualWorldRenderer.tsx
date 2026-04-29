@@ -10,6 +10,7 @@ import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
 import QuestPanel from './VirtualWorld/QuestPanel';
 import { useVirtualWorld } from '../hooks/useVirtualWorld';
+import { MAP_IMAGE_W, MAP_IMAGE_H } from '../config/mapConfig';
 
 export default function VirtualWorldRenderer({ data: initialData }: { data: VirtualCampusAdminSnapshot }) {
   const { data, dialogue, moveAvatar, talkToNpc, setDialogue } = useVirtualWorld(initialData);
@@ -92,8 +93,13 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     const cameraPlane = document.getElementById('rpg-camera-plane');
     const cx = Number(cameraPlane?.getAttribute('data-cx') || 0);
     const cy = Number(cameraPlane?.getAttribute('data-cy') || 0);
-    const targetX = Math.round(((sx - cx) / 64 + (sy - cy) / 32) / 2);
-    const targetY = Math.round(((sy - cy) / 32 - (sx - cx) / 64) / 2);
+    // 2D Flat grid inverse projection
+    const tileW = MAP_IMAGE_W / widthTiles;
+    const tileH = MAP_IMAGE_H / heightTiles;
+    const worldX = sx - cx;
+    const worldY = sy - cy;
+    const targetX = Math.floor(worldX / tileW);
+    const targetY = Math.floor(worldY / tileH);
     if (targetX < 0 || targetX >= widthTiles || targetY < 0 || targetY >= heightTiles) return;
     const foundPath = findPath(Math.floor(myAvatar.positionX), Math.floor(myAvatar.positionY), targetX, targetY);
     if (foundPath) {
@@ -107,7 +113,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   return (
     <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
-        <MapLayer playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
+        <MapLayer widthTiles={widthTiles} heightTiles={heightTiles} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
           {/* Collision Visualizer (Red Boxes) - Keep for now to help align the map image */}
           <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
           
