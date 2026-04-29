@@ -5,7 +5,6 @@ import AvatarLayer from './VirtualWorld/AvatarLayer';
 import NpcMarker from './VirtualWorld/NpcMarker';
 import PortalMarker from './VirtualWorld/PortalMarker';
 import CollisionLayer from './VirtualWorld/CollisionLayer';
-import WorldObject from './VirtualWorld/WorldObject';
 import DialoguePanel from './VirtualWorld/DialoguePanel';
 import InventoryPanel from './VirtualWorld/InventoryPanel';
 import StatsPanel from './VirtualWorld/StatsPanel';
@@ -21,10 +20,6 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
   const { currentMap, avatars, portals, collisionZones, npcs } = data.roomView;
   const { widthTiles, heightTiles, mapCode } = currentMap;
   const myAvatar = data.memberView.avatar;
-  const isSquare = mapCode.toLowerCase().includes('square') || mapCode.toLowerCase().includes('plaza');
-
-  // Log map code for debugging
-  console.log('[DEBUG] Current Map Code:', mapCode);
 
   // Keyboard controls
   useEffect(() => {
@@ -113,17 +108,9 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
     <div className="fixed inset-0 bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center cursor-crosshair" onClick={handleMapClick}>
         <MapLayer currentMap={currentMap} playerX={myAvatar?.positionX} playerY={myAvatar?.positionY}>
+          {/* Collision Visualizer (Red Boxes) - Keep for now to help align the map image */}
           <CollisionLayer zones={collisionZones} widthTiles={widthTiles} heightTiles={heightTiles} />
           
-          {/* BUILDINGS / OBJECTS (Styled Placeholders for Reliability) */}
-          {isSquare && (
-            <>
-              <WorldObject x={-4} y={-4} imageUrl="" width={300} height={400} label="코딩동 (CODINGDONG)" />
-              <WorldObject x={8} y={-6} imageUrl="" width={400} height={300} label="OX 퀴즈관" />
-              <WorldObject x={-8} y={6} imageUrl="" width={150} height={500} label="랭킹 타워" />
-            </>
-          )}
-
           {portals.map(portal => (
             <PortalMarker key={portal.id} portal={portal} widthTiles={widthTiles} heightTiles={heightTiles} onClick={(e) => { handlePortalClick(portal.sourcePortalKey, e); }} />
           ))}
@@ -134,6 +121,7 @@ export default function VirtualWorldRenderer({ data: initialData }: { data: Virt
         </MapLayer>
       </div>
 
+      {/* Floating HUD */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
           <div className="bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl">
